@@ -95,6 +95,7 @@ namespace TimePunch
                         " where userIdentity = '" + newUserID + "' ";
 
                     SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                    log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
                     command.ExecuteNonQuery();
 
                     // update user info
@@ -109,16 +110,15 @@ namespace TimePunch
                         " Where userIdentity = '" + newUserID + "' ";
 
                     SQLiteCommand command3 = new SQLiteCommand(sql, m_dbConnection);
+                    log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
                     command3.ExecuteNonQuery();
 
                     MessageBox.Show("User Updated!", "Info");
-
 
                 }
                 else
                 {
                     // add the user
-
                     string sql = "insert into TimePunchUserIdentities" +
                         " (" +
                         " userIdentity, " +
@@ -136,6 +136,7 @@ namespace TimePunch
                         " ) ";
 
                     SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
+                    log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
                     command2.ExecuteNonQuery();
 
                     // Add user info
@@ -160,6 +161,7 @@ namespace TimePunch
                         " ) ";
 
                     SQLiteCommand command3 = new SQLiteCommand(sql, m_dbConnection);
+                    log.Info("SQL: " + sql.Replace(Environment.NewLine," "));
                     command3.ExecuteNonQuery();
 
                     MessageBox.Show("User Created!", "Info");

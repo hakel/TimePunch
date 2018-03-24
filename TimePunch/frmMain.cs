@@ -157,6 +157,7 @@ namespace TimePunch
                 " ) ";
 
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command.ExecuteNonQuery();
             return signInTime;
 
@@ -556,6 +557,7 @@ namespace TimePunch
                 " and signinType = '" + signinType + "'";
 
             SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command2.ExecuteNonQuery();
 
             return unixTimestamp;

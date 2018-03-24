@@ -14,17 +14,15 @@ using System.Configuration;
 //https://social.msdn.microsoft.com/Forums/windows/en-US/7f9462c2-5c03-49e3-aa96-f3d09cbe9fa2/clickonce-certificate-creation-error?forum=winformssetup
 //https://docs.microsoft.com/en-us/visualstudio/deployment/how-to-publish-a-clickonce-application-using-the-publish-wizard
 
-//TODO - use config file for const values
 //TODO - send database
-//TODO - InfoLog all of the things that write to db as a "backup"
+//TODO - send logs -- SmtpAppender 
+//TODO - combo box type ahead - built in AutoComplete*
+
+//TODO - Unit tests and/or functional tests
 
 //TODO - validate form fields before submitting (which ones?)
 //TODO - do not allow commas to be entered when creating a user
-//TODO - send logs -- SmtpAppender 
-//TODO - combo box type ahead - built in AutoComplete*
 //TODO - default the clock type in combo box based on a schedule
-//TODO - Unit tests and/or functional tests
-//TODO - Add to gitlab
 
 //--------------------------------------------------
 /*
@@ -116,6 +114,7 @@ namespace TimePunch
                 " )";
 
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command.ExecuteNonQuery();
 
             log.Info("Table Created: TimePunchEvents");
@@ -134,6 +133,7 @@ namespace TimePunch
                 " )";
 
             SQLiteCommand command1 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command1.ExecuteNonQuery();
             log.Info("Table Created: TimePunchUserIdentities");
 
@@ -159,6 +159,7 @@ namespace TimePunch
                 " ) ";
 
             SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command2.ExecuteNonQuery();
 
             log.Info("User Added: " + AdminUserID);
@@ -179,6 +180,7 @@ namespace TimePunch
                 " )";
 
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command.ExecuteNonQuery();
 
             log.Info("Table Created: TimePunchUserInfo");
@@ -207,6 +209,7 @@ namespace TimePunch
                 " ) ";
 
             SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command2.ExecuteNonQuery();
             log.Info("User Added: " + AdminUserID);
         }
@@ -284,6 +287,7 @@ namespace TimePunch
                 " )";
 
             SQLiteCommand command1 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command1.ExecuteNonQuery();
 
             log.Info("Table Created: TimePunchDBVersion");
@@ -306,6 +310,7 @@ namespace TimePunch
                 " ) ";
 
             SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command2.ExecuteNonQuery();
             Globals.DBVersion = dbVersion;
             log.Info("DBVersion=" + Globals.DBVersion);
@@ -773,6 +778,7 @@ namespace TimePunch
                         " and signinType = '" + signinType + "'";
 
                     SQLiteCommand command3 = new SQLiteCommand(sql3, m_dbConnection);
+                    log.Info("SQL: " + sql3.Replace(Environment.NewLine, " "));
                     command3.ExecuteNonQuery();
                 }
                 else
@@ -840,6 +846,7 @@ namespace TimePunch
                         " ) ";
 
                     SQLiteCommand command2 = new SQLiteCommand(sql2, m_dbConnection);
+                    log.Info("SQL: " + sql2.Replace(Environment.NewLine, " "));
                     command2.ExecuteNonQuery();
 
                 }
@@ -1037,6 +1044,7 @@ namespace TimePunch
                                 " and createUnixTimeStamp = " + uniqueKey;
 
                             SQLiteCommand command3 = new SQLiteCommand(sql3, m_dbConnection);
+                            log.Info("SQL: " + sql3.Replace(Environment.NewLine, " "));
                             command3.ExecuteNonQuery();
 
                         }
