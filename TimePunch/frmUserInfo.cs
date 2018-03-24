@@ -8,15 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Configuration;
 
 namespace TimePunch
 {
     public partial class frmUserInfo : Form
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private string connectionString = "Data Source=" + ConfigurationManager.AppSettings["dbFileName"].ToString() + ";Version=3;";
 
-        private const string dbFileName = "TimePunchDB.sqlite";
-        private const string connectionString = "Data Source=" + dbFileName + ";Version=3;";
         SQLiteConnection m_dbConnection;
 
         public string userIDForForm = "";

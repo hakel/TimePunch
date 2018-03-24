@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Configuration;
 
 // publish info
 //https://social.msdn.microsoft.com/Forums/windows/en-US/7f9462c2-5c03-49e3-aa96-f3d09cbe9fa2/clickonce-certificate-creation-error?forum=winformssetup
@@ -46,13 +47,7 @@ namespace TimePunch
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        // TODO - use config values
-        private const string dbFileName = "TimePunchDB.sqlite";
-        private const string connectionString = "Data Source=" + dbFileName + ";Version=3;";
-        private const string SignInType_Lab = "Lab";
-        private const string SignInType_Theory = "Theory";
-        private const string RowModifiedTag = "Modified";
-        private const string BackupPath = @"C:\Logs\Punch";
+        private string connectionString = "Data Source=" + ConfigurationManager.AppSettings["dbFileName"].ToString() + ";Version=3;";
 
         SQLiteConnection m_dbConnection;
 
@@ -515,7 +510,7 @@ namespace TimePunch
                 fillComboWithUsers(cboUsersForPassword);
                 setupQueries();
                 dtUpdateHours.Value = DateTime.Now;
-                txtDBBackup.Text = BackupPath;
+                txtDBBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
 
             }
             catch (Exception ex)
@@ -570,11 +565,11 @@ namespace TimePunch
                 string signinType = "";
                 if (rdLab.Checked)
                 {
-                    signinType = SignInType_Lab;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
                 }
                 else
                 {
-                    signinType = SignInType_Theory;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
                 }
 
 
@@ -709,11 +704,11 @@ namespace TimePunch
                 string signinType = "";
                 if (rdLab.Checked)
                 {
-                    signinType = SignInType_Lab;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
                 }
                 else
                 {
-                    signinType = SignInType_Theory;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
                 }
 
                 // Make a connection to the database if it hasnt already
@@ -970,7 +965,7 @@ namespace TimePunch
                     // look for row changes
                     if (row.Tag != null)
                     {
-                        if (row.Tag.ToString() == RowModifiedTag)
+                        if (row.Tag.ToString() == ConfigurationManager.AppSettings["RowModifiedTag"].ToString())
                         {
                             // Grab the changes
 
@@ -1062,7 +1057,7 @@ namespace TimePunch
 
             try
             {
-                grdUserHours.Rows[e.RowIndex].Tag = RowModifiedTag;
+                grdUserHours.Rows[e.RowIndex].Tag = ConfigurationManager.AppSettings["RowModifiedTag"].ToString();
 
             }
             catch (Exception ex)
@@ -1249,7 +1244,7 @@ namespace TimePunch
 
                 string dbFileNameAndPath = m_dbConnection.FileName;
                 string fileName = dbFileNameAndPath.Substring(dbFileNameAndPath.LastIndexOf("\\") + 1);
-                string sourcePath = dbFileNameAndPath.Replace("\\" + dbFileName,"");
+                string sourcePath = dbFileNameAndPath.Replace("\\" + ConfigurationManager.AppSettings["dbFileName"].ToString(),"");
 
                 m_dbConnection.Close();
                 m_dbConnection = null;

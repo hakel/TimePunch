@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Configuration;
 
 //http://blog.tigrangasparian.com/2012/02/09/getting-started-with-sqlite-in-c-part-one/
 //https://www.youtube.com/watch?v=TrJcKHMe6Y8
@@ -23,15 +24,8 @@ namespace TimePunch
     public partial class frmMain : Form
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        
-        // TODO - use config values
-        private const string AdminUserID = "admin";
-        private const string AdminDefaultUserPassword = "admin";
-        private const string dbFileName = "TimePunchDB.sqlite";
-        private const string SignInType_Lab = "Lab";
-        private const string SignInType_Theory = "Theory";
 
-        private const string connectionString = "Data Source=" + dbFileName + ";Version=3;";
+        private string connectionString = "Data Source=" + ConfigurationManager.AppSettings["dbFileName"].ToString() + ";Version=3;";
         SQLiteConnection m_dbConnection;
 
         public frmMain()
@@ -179,11 +173,11 @@ namespace TimePunch
                 string signinType = "";
                 if (rdLab.Checked)
                 {
-                    signinType = SignInType_Lab;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
                 }
                 else
                 {
-                    signinType = SignInType_Theory;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
                 }
 
                 Int32 punchtime = normalPunchIN(userIdentity, signinType);
@@ -245,7 +239,7 @@ namespace TimePunch
                 catch (Exception ex)
                 {
                     // show the admin screen
-                    if (userIdentity == AdminUserID && userPassword == AdminDefaultUserPassword)
+                    if (userIdentity == ConfigurationManager.AppSettings["AdminUserID"].ToString() && userPassword == ConfigurationManager.AppSettings["AdminDefaultUserPassword"].ToString())
                     {
                         // close the database connection
                         try
@@ -341,11 +335,11 @@ namespace TimePunch
             string signinType = "";
             if (rdLab.Checked)
             {
-                signinType = SignInType_Lab;
+                signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
             }
             else
             {
-                signinType = SignInType_Theory;
+                signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
             }
 
             // Get the last punch
@@ -481,11 +475,11 @@ namespace TimePunch
                 string signinType = "";
                 if (rdLab.Checked)
                 {
-                    signinType = SignInType_Lab;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
                 }
                 else
                 {
-                    signinType = SignInType_Theory;
+                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
                 }
 
                 Int32 punchtime = normalPunchOUT(userIdentity, signinType);
@@ -718,7 +712,7 @@ namespace TimePunch
                 // this is a first time setup, so show the admin screen
                 var adminForm = new frmAdmin();
                 //TODO - assign db variables so we dont have them duplicated
-                adminForm.AdminUserID = AdminUserID;
+                adminForm.AdminUserID = ConfigurationManager.AppSettings["AdminUserID"].ToString();
 
                 adminForm.ShowDialog(this);
 
