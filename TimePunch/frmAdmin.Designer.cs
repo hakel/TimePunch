@@ -66,6 +66,9 @@
             this.btnDBBackup = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtDBBackup = new System.Windows.Forms.TextBox();
+            this.btnLogBackup = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtLogBackup = new System.Windows.Forms.TextBox();
             this.tabAdmin.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tbShowDay.SuspendLayout();
@@ -441,6 +444,9 @@
             // 
             // tabPage10
             // 
+            this.tabPage10.Controls.Add(this.btnLogBackup);
+            this.tabPage10.Controls.Add(this.label2);
+            this.tabPage10.Controls.Add(this.txtLogBackup);
             this.tabPage10.Controls.Add(this.btnDBBackup);
             this.tabPage10.Controls.Add(this.label1);
             this.tabPage10.Controls.Add(this.txtDBBackup);
@@ -477,6 +483,32 @@
             this.txtDBBackup.Name = "txtDBBackup";
             this.txtDBBackup.Size = new System.Drawing.Size(264, 20);
             this.txtDBBackup.TabIndex = 38;
+            // 
+            // btnLogBackup
+            // 
+            this.btnLogBackup.Location = new System.Drawing.Point(12, 137);
+            this.btnLogBackup.Name = "btnLogBackup";
+            this.btnLogBackup.Size = new System.Drawing.Size(109, 23);
+            this.btnLogBackup.TabIndex = 43;
+            this.btnLogBackup.Text = "Backup Logs";
+            this.btnLogBackup.UseVisualStyleBackColor = true;
+            this.btnLogBackup.Click += new System.EventHandler(this.btnLogBackup_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(9, 95);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(90, 13);
+            this.label2.TabIndex = 42;
+            this.label2.Text = "Log Backup Path";
+            // 
+            // txtLogBackup
+            // 
+            this.txtLogBackup.Location = new System.Drawing.Point(12, 111);
+            this.txtLogBackup.Name = "txtLogBackup";
+            this.txtLogBackup.Size = new System.Drawing.Size(264, 20);
+            this.txtLogBackup.TabIndex = 41;
             // 
             // frmAdmin
             // 
@@ -557,5 +589,8 @@
         private System.Windows.Forms.Button btnDBBackup;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtDBBackup;
+        private System.Windows.Forms.Button btnLogBackup;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtLogBackup;
     }
 }

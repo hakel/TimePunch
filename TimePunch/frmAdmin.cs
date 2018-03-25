@@ -475,6 +475,7 @@ namespace TimePunch
             try
             {
                 OneTimeSetup();
+                MessageBox.Show("Setup Complete!", "Info");
             }
             catch (Exception ex)
             {
@@ -516,6 +517,7 @@ namespace TimePunch
                 setupQueries();
                 dtUpdateHours.Value = DateTime.Now;
                 txtDBBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
+                txtLogBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
 
             }
             catch (Exception ex)
@@ -1277,7 +1279,8 @@ namespace TimePunch
                 // overwrite the destination file if it already exists.
                 System.IO.File.Copy(sourceFile, destFile, true);
 
-                // reconnect
+                MessageBox.Show("Log Files Copied", "Info");
+
                 connectToDatabase();
 
                 //string exePath = Application.ExecutablePath;
@@ -1291,6 +1294,46 @@ namespace TimePunch
             }
 
 
+
+        }
+
+        private void btnLogBackup_Click(object sender, EventArgs e)
+        {
+            log.Debug("IN");
+
+            try
+            {
+
+                string targetPath = @txtLogBackup.Text;
+
+                // To copy a folder's contents to a new location:
+                // Create a new target folder, if necessary.
+                if (!System.IO.Directory.Exists(targetPath))
+                {
+                    System.IO.Directory.CreateDirectory(targetPath);
+                }
+
+                // get all of the log files
+                string appPath = Application.StartupPath;
+                String[] files = System.IO.Directory.GetFiles(appPath, "*.log");
+
+                // loop through the files and copy them
+                foreach (string file in files)
+                {
+                    // parse out just the file name
+                    string fName = file.Substring(appPath.Length + 1);
+
+                    string destfile = System.IO.Path.Combine(targetPath, fName);
+                    System.IO.File.Copy(file, destfile, true);
+                }
+
+                MessageBox.Show("Log Files Copied", "Info");
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
 
         }
     }
