@@ -27,10 +27,13 @@ using System.Configuration;
 //--------------------------------------------------
 /*
  *  
- *  I only have to track lab and theory hours
- *  I need to be able to add/deduct time for each student on any occasion
- *  I need it to break down daily to report to state board monthly.  
- *  State Board has their own form when submitting hours monthly.
+ *  DONE - I only have to track lab and theory hours 
+ *  DONE - I need to be able to add/deduct time for each student on any occasion
+ *  DONE - I need to be able to clock everyone out at the end of class
+ *  IMPROVE - I need to be able to see whom has not clocked out
+ *  DONE - I need to be able to clock someone out if they forgot to clock out
+ *  IMPROVE - I need it to break down daily to report to state board monthly.  
+ *  IMPROVE - State Board has their own form when submitting hours monthly.
  */
 
 //Logging - https://stackify.com/log4net-guide-dotnet-logging/
@@ -357,12 +360,12 @@ namespace TimePunch
                         // create the header if this is the first row
                         if (rowCount == 0)
                         {
-                            if(i!=0)
+                            if (i != 0)
                             {
                                 headerRow.Append(",");
                                 sqlStar.Append(",");
                             }
-                            headerRow.Append(fieldName.Replace(",",""));
+                            headerRow.Append(fieldName.Replace(",", ""));
                             sqlStar.Append(fieldName.Replace(",", ""));
                             if (fieldName.IndexOf("UnixTime") > 0 && showDates)
                             {
@@ -390,7 +393,7 @@ namespace TimePunch
                 }
                 reader.Close();
 
-                txtDataQuery.Text = sql.Replace(" * "," " + sqlStar.ToString() + " ");
+                txtDataQuery.Text = sql.Replace(" * ", " " + sqlStar.ToString() + " ");
                 headerRow.Append(Environment.NewLine);
                 txtDataResults.Text = headerRow.ToString() + output.ToString();
                 if (txtDataResults.Text.Replace(Environment.NewLine, "") == "")
@@ -516,6 +519,7 @@ namespace TimePunch
                 fillComboWithUsers(cboUsersForPassword);
                 setupQueries();
                 dtUpdateHours.Value = DateTime.Now;
+                dtClockOutAll.Value = DateTime.Now;
                 txtDBBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
                 txtLogBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
 
@@ -588,9 +592,9 @@ namespace TimePunch
                 grdUserHours.Columns.Add("createUnixTimeStamp", "Unique Key");
                 grdUserHours.Columns.Add("manualPunch", "Manual");
 
-                foreach(DataGridViewTextBoxColumn col in grdUserHours.Columns)
+                foreach (DataGridViewTextBoxColumn col in grdUserHours.Columns)
                 {
-                    if(col.Name == "userIdentity" || col.Name == "createUnixTimeStamp" || col.Name == "manualPunch")
+                    if (col.Name == "userIdentity" || col.Name == "createUnixTimeStamp" || col.Name == "manualPunch")
                     {
                         col.ReadOnly = true;
                     }
@@ -1005,7 +1009,7 @@ namespace TimePunch
 
                             foreach (DataGridViewCell cell in row.Cells)
                             {
-                                if(grdUserHours.Columns[cell.ColumnIndex].Name == "createUnixTimeStamp")
+                                if (grdUserHours.Columns[cell.ColumnIndex].Name == "createUnixTimeStamp")
                                 {
                                     uniqueKey = cell.Value.ToString();
                                 }
@@ -1254,7 +1258,7 @@ namespace TimePunch
 
                 string dbFileNameAndPath = m_dbConnection.FileName;
                 string fileName = dbFileNameAndPath.Substring(dbFileNameAndPath.LastIndexOf("\\") + 1);
-                string sourcePath = dbFileNameAndPath.Replace("\\" + ConfigurationManager.AppSettings["dbFileName"].ToString(),"");
+                string sourcePath = dbFileNameAndPath.Replace("\\" + ConfigurationManager.AppSettings["dbFileName"].ToString(), "");
 
                 m_dbConnection.Close();
                 m_dbConnection = null;
@@ -1336,5 +1340,237 @@ namespace TimePunch
             }
 
         }
+
+        private void btnClockOutAll_Click(object sender, EventArgs e)
+        {
+            log.Debug("IN");
+
+            try
+            {
+                Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                string signOutComputer = System.Environment.MachineName;
+
+                string sql3 = "update TimePunchEvents set" + 
+                " signoutUnixTime = " + unixTimestamp.ToString() + ", " +
+                " signoutComputer = '" + signOutComputer + "', " +
+                " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
+                " where signoutUnixTime = signinUnixTime " +  
+                " and signinYear = " + dtClockOutAll.Value.Year.ToString() +
+                " and signinMonth = " + dtClockOutAll.Value.Month.ToString() +
+                " and signinDay = " + dtClockOutAll.Value.Day.ToString();
+
+                SQLiteCommand command3 = new SQLiteCommand(sql3, m_dbConnection);
+                log.Info("SQL: " + sql3.Replace(Environment.NewLine, " "));
+                command3.ExecuteNonQuery();
+
+                MessageBox.Show("All Users signed out for selected date using the current date and time.", "Info");
+
+                // update the grid since we made updates
+                updateClockOutGrid();
+
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+        }
+
+        private void dtClockOutAll_ValueChanged(object sender, EventArgs e)
+        {
+
+            log.Debug("IN");
+
+            try
+            {
+                updateClockOutGrid();
+                //MessageBox.Show("Date Changed!", "Info");
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+
+        }
+        private void updateClockOutGrid()
+        {
+            log.Debug("IN");
+
+            try
+            {
+
+                StringBuilder sqlDailyTotals = new StringBuilder();
+                sqlDailyTotals.Append("select ");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append("u.userGrade");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(", u.userLastName");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(", u.userFirstName");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(",e.signinMonth");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(",e.signinDay");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(", e.signinYear");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(", e.signinType");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append("from ");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append("TimePunchEvents as e ");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append("inner join ");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append("TimePunchUserInfo as u on e.userIdentity = u.userIdentity ");
+                sqlDailyTotals.Append(Environment.NewLine);
+
+                sqlDailyTotals.Append(" where e.signoutUnixTime = e.signinUnixTime ");
+                sqlDailyTotals.Append(" and e.signinYear = " + dtClockOutAll.Value.Year.ToString());
+                sqlDailyTotals.Append(" and e.signinMonth = " + dtClockOutAll.Value.Month.ToString());
+                sqlDailyTotals.Append(" and e.signinDay = " + dtClockOutAll.Value.Day.ToString());
+
+                sqlDailyTotals.Append(" order by ");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append("u.userGrade");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(",e.signinYear");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(",e.signinMonth");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(",e.signinDay");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(",u.userLastName");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(", u.userFirstName");
+                sqlDailyTotals.Append(Environment.NewLine);
+                sqlDailyTotals.Append(", e.signinType");
+                sqlDailyTotals.Append(Environment.NewLine);
+
+                string sql = sqlDailyTotals.ToString();
+
+                /*
+                string sql = "select * from TimePunchEvents " +
+                " where signoutUnixTime = signinUnixTime " +
+                " and signinYear = " + dtClockOutAll.Value.Year.ToString() +
+                " and signinMonth = " + dtClockOutAll.Value.Month.ToString() +
+                " and signinDay = " + dtClockOutAll.Value.Day.ToString();
+                */
+
+                bool showDates = true; // chkIncludeReadableDates.Checked;
+
+                StringBuilder output = new StringBuilder();
+                StringBuilder headerRow = new StringBuilder();
+                StringBuilder sqlStar = new StringBuilder();
+
+                // Make a connection to the database if it hasnt already
+                connectToDatabase();
+
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                int rowCount = 0;
+                while (reader.Read())
+                {
+                    int columnCount = reader.FieldCount;
+
+                    for (int i = 0; i < columnCount; i++)
+                    {
+                        string fieldName = reader.GetName(i);
+                        // create the header if this is the first row
+                        if (rowCount == 0)
+                        {
+                            if (i != 0)
+                            {
+                                headerRow.Append(",");
+                                sqlStar.Append(",");
+                            }
+                            headerRow.Append(fieldName.Replace(",", ""));
+                            sqlStar.Append(fieldName.Replace(",", ""));
+                            if (fieldName.IndexOf("UnixTime") > 0 && showDates)
+                            {
+                                headerRow.Append(",");
+                                sqlStar.Append(",");
+                                headerRow.Append(fieldName.Replace(",", "") + "_ToDate");
+                                sqlStar.Append(" datetime(" + fieldName.Replace(",", "") + ", 'unixepoch', 'localtime') as dt" + fieldName.Replace(",", "").Replace("UnixTime", ""));
+                            }
+                        }
+
+                        // row data
+                        if (i != 0)
+                        {
+                            output.Append(",");
+                        }
+                        output.Append(reader[i].ToString());
+                        if (fieldName.IndexOf("UnixTime") > 0 && showDates)
+                        {
+                            output.Append(",");
+                            output.Append(convertUnixDateTimeToDisplayDateTime(reader[i].ToString()));
+                        }
+                    }
+                    output.Append(Environment.NewLine);
+                    rowCount += 1;
+                }
+                reader.Close();
+
+                headerRow.Append(Environment.NewLine);
+
+                string strQuery = sql.Replace(" * ", " " + sqlStar.ToString() + " ");
+                string strResults = headerRow.ToString() + output.ToString();
+
+                if (strResults.Replace(Environment.NewLine, "") == "")
+                {
+                    strResults = "No Data Found";
+                }
+
+                //now fill the grid from the text data
+                grdClockOut.Columns.Clear();
+                if (strResults.Replace(Environment.NewLine, "") != "")
+                {
+                    string[] rows = strResults.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                    int rowIndex = 0;
+                    foreach (string row in rows)
+                    {
+                        if (rowIndex == 0)
+                        {
+                            // column header row
+                            string[] columns = row.Split(new string[] { "," }, StringSplitOptions.None);
+                            foreach (string column in columns)
+                            {
+                                grdClockOut.Columns.Add(column, column);
+                            }
+                        }
+                        else
+                        {
+                            // data row
+                            DataGridViewRow gridrow = new DataGridViewRow();
+
+                            string[] fields = row.Split(new string[] { "," }, StringSplitOptions.None);
+                            foreach (string field in fields)
+                            {
+                                DataGridViewTextBoxCell cell = new DataGridViewTextBoxCell();
+                                cell.Value = field;
+                                gridrow.Cells.Add(cell);
+                            }
+
+
+                            grdClockOut.Rows.Add(gridrow);
+                        }
+
+                        rowIndex += 1;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+
+        }
+
+
+
     }
 }

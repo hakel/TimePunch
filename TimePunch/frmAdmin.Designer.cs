@@ -63,12 +63,17 @@
             this.txtDataQuery = new System.Windows.Forms.TextBox();
             this.cboDataDump = new System.Windows.Forms.ComboBox();
             this.tabPage10 = new System.Windows.Forms.TabPage();
-            this.btnDBBackup = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtDBBackup = new System.Windows.Forms.TextBox();
             this.btnLogBackup = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.txtLogBackup = new System.Windows.Forms.TextBox();
+            this.btnDBBackup = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtDBBackup = new System.Windows.Forms.TextBox();
+            this.tabPage9 = new System.Windows.Forms.TabPage();
+            this.btnClockOutAll = new System.Windows.Forms.Button();
+            this.dtClockOutAll = new System.Windows.Forms.DateTimePicker();
+            this.grdClockOut = new System.Windows.Forms.DataGridView();
+            this.label3 = new System.Windows.Forms.Label();
             this.tabAdmin.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tbShowDay.SuspendLayout();
@@ -83,6 +88,8 @@
             this.tabPage4.SuspendLayout();
             this.tabPage7.SuspendLayout();
             this.tabPage10.SuspendLayout();
+            this.tabPage9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grdClockOut)).BeginInit();
             this.SuspendLayout();
             // 
             // txtDataResults
@@ -124,6 +131,7 @@
             // 
             // tabAdmin
             // 
+            this.tabAdmin.Controls.Add(this.tabPage9);
             this.tabAdmin.Controls.Add(this.tabPage2);
             this.tabAdmin.Controls.Add(this.tabPage1);
             this.tabAdmin.Controls.Add(this.tabPage3);
@@ -458,6 +466,32 @@
             this.tabPage10.Text = "Utilities";
             this.tabPage10.UseVisualStyleBackColor = true;
             // 
+            // btnLogBackup
+            // 
+            this.btnLogBackup.Location = new System.Drawing.Point(12, 137);
+            this.btnLogBackup.Name = "btnLogBackup";
+            this.btnLogBackup.Size = new System.Drawing.Size(109, 23);
+            this.btnLogBackup.TabIndex = 43;
+            this.btnLogBackup.Text = "Backup Logs";
+            this.btnLogBackup.UseVisualStyleBackColor = true;
+            this.btnLogBackup.Click += new System.EventHandler(this.btnLogBackup_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(9, 95);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(90, 13);
+            this.label2.TabIndex = 42;
+            this.label2.Text = "Log Backup Path";
+            // 
+            // txtLogBackup
+            // 
+            this.txtLogBackup.Location = new System.Drawing.Point(12, 111);
+            this.txtLogBackup.Name = "txtLogBackup";
+            this.txtLogBackup.Size = new System.Drawing.Size(264, 20);
+            this.txtLogBackup.TabIndex = 41;
+            // 
             // btnDBBackup
             // 
             this.btnDBBackup.Location = new System.Drawing.Point(12, 53);
@@ -484,31 +518,59 @@
             this.txtDBBackup.Size = new System.Drawing.Size(264, 20);
             this.txtDBBackup.TabIndex = 38;
             // 
-            // btnLogBackup
+            // tabPage9
             // 
-            this.btnLogBackup.Location = new System.Drawing.Point(12, 137);
-            this.btnLogBackup.Name = "btnLogBackup";
-            this.btnLogBackup.Size = new System.Drawing.Size(109, 23);
-            this.btnLogBackup.TabIndex = 43;
-            this.btnLogBackup.Text = "Backup Logs";
-            this.btnLogBackup.UseVisualStyleBackColor = true;
-            this.btnLogBackup.Click += new System.EventHandler(this.btnLogBackup_Click);
+            this.tabPage9.Controls.Add(this.label3);
+            this.tabPage9.Controls.Add(this.grdClockOut);
+            this.tabPage9.Controls.Add(this.dtClockOutAll);
+            this.tabPage9.Controls.Add(this.btnClockOutAll);
+            this.tabPage9.Location = new System.Drawing.Point(4, 22);
+            this.tabPage9.Name = "tabPage9";
+            this.tabPage9.Size = new System.Drawing.Size(551, 265);
+            this.tabPage9.TabIndex = 5;
+            this.tabPage9.Text = "Clock Out All";
+            this.tabPage9.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // btnClockOutAll
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 95);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(90, 13);
-            this.label2.TabIndex = 42;
-            this.label2.Text = "Log Backup Path";
+            this.btnClockOutAll.Location = new System.Drawing.Point(13, 232);
+            this.btnClockOutAll.Name = "btnClockOutAll";
+            this.btnClockOutAll.Size = new System.Drawing.Size(109, 23);
+            this.btnClockOutAll.TabIndex = 41;
+            this.btnClockOutAll.Text = "Clock Out All";
+            this.btnClockOutAll.UseVisualStyleBackColor = true;
+            this.btnClockOutAll.Click += new System.EventHandler(this.btnClockOutAll_Click);
             // 
-            // txtLogBackup
+            // dtClockOutAll
             // 
-            this.txtLogBackup.Location = new System.Drawing.Point(12, 111);
-            this.txtLogBackup.Name = "txtLogBackup";
-            this.txtLogBackup.Size = new System.Drawing.Size(264, 20);
-            this.txtLogBackup.TabIndex = 41;
+            this.dtClockOutAll.Location = new System.Drawing.Point(14, 12);
+            this.dtClockOutAll.Name = "dtClockOutAll";
+            this.dtClockOutAll.Size = new System.Drawing.Size(200, 20);
+            this.dtClockOutAll.TabIndex = 42;
+            this.dtClockOutAll.ValueChanged += new System.EventHandler(this.dtClockOutAll_ValueChanged);
+            // 
+            // grdClockOut
+            // 
+            this.grdClockOut.AllowUserToAddRows = false;
+            this.grdClockOut.AllowUserToDeleteRows = false;
+            this.grdClockOut.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.grdClockOut.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.grdClockOut.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.grdClockOut.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.grdClockOut.Location = new System.Drawing.Point(13, 56);
+            this.grdClockOut.Name = "grdClockOut";
+            this.grdClockOut.RowHeadersWidth = 20;
+            this.grdClockOut.Size = new System.Drawing.Size(522, 167);
+            this.grdClockOut.TabIndex = 48;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 40);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(127, 13);
+            this.label3.TabIndex = 49;
+            this.label3.Text = "Users who are clocked in";
             // 
             // frmAdmin
             // 
@@ -545,6 +607,9 @@
             this.tabPage7.PerformLayout();
             this.tabPage10.ResumeLayout(false);
             this.tabPage10.PerformLayout();
+            this.tabPage9.ResumeLayout(false);
+            this.tabPage9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grdClockOut)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -592,5 +657,10 @@
         private System.Windows.Forms.Button btnLogBackup;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtLogBackup;
+        private System.Windows.Forms.TabPage tabPage9;
+        private System.Windows.Forms.Button btnClockOutAll;
+        private System.Windows.Forms.DateTimePicker dtClockOutAll;
+        private System.Windows.Forms.DataGridView grdClockOut;
+        private System.Windows.Forms.Label label3;
     }
 }
