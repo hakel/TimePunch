@@ -10,14 +10,20 @@ using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Configuration;
 
+//DB Browswer
+//http://sqlitebrowser.org/
+
+//SQLite Studio
+//https://sqlitestudio.pl/index.rvt
+
+//SQLite tutorials
 //http://blog.tigrangasparian.com/2012/02/09/getting-started-with-sqlite-in-c-part-one/
 //https://www.youtube.com/watch?v=TrJcKHMe6Y8
-
 //https://code.msdn.microsoft.com/windowsapps/How-to-use-SQLite-with-96f22fac
 //https://www.codeproject.com/Tips/1057992/Using-SQLite-An-Example-of-CRUD-Operations-in-Csha
 
-    //Date time info
-    //https://www.sqlite.org/lang_datefunc.html
+//Date time info
+//https://www.sqlite.org/lang_datefunc.html
 
 namespace TimePunch
 {

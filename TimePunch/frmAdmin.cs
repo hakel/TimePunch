@@ -22,7 +22,6 @@ using System.Configuration;
 
 //TODO - validate form fields before submitting (which ones?)
 //TODO - do not allow commas to be entered when creating a user
-//TODO - default the clock type in combo box based on a schedule
 
 //--------------------------------------------------
 /*
@@ -215,68 +214,6 @@ namespace TimePunch
             log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command2.ExecuteNonQuery();
             log.Info("User Added: " + AdminUserID);
-        }
-        void dataDump()
-        {
-            log.Debug("IN");
-            // Make a connection to the database if it hasnt already
-            connectToDatabase();
-
-            string sql = "select *, datetime(signinUnixTime, 'unixepoch', 'localtime') dtSignIn, datetime(signoutUnixTime, 'unixepoch', 'localtime') dtSignOut  from TimePunchEvents order by createUnixTimeStamp desc";
-
-            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-            SQLiteDataReader reader = command.ExecuteReader();
-            StringBuilder output = new StringBuilder();
-            //datetime(1092941466, 'unixepoch', 'localtime');
-
-            while (reader.Read())
-            {
-                output.Append("ID: " + reader["userIdentity"]);
-                output.Append(" - ");
-                output.Append("In: " + reader["signinUnixTime"]);
-                output.Append(" - ");
-                output.Append("In SQL: " + reader["dtSignIn"]);
-                output.Append(" - ");
-                output.Append("In Date: " + convertUnixDateTimeToDisplayDateTime(reader["signinUnixTime"].ToString()));
-                output.Append(" - ");
-                output.Append("Out: " + reader["signoutUnixTime"]);
-                output.Append(" - ");
-                output.Append("Out SQL: " + reader["dtSignOut"]);
-                output.Append(" - ");
-                output.Append("Out Date: " + convertUnixDateTimeToDisplayDateTime(reader["signoutUnixTime"].ToString()));
-                output.Append(" - ");
-                output.Append("Type: " + reader["signinType"]);
-                output.Append(" - ");
-                output.Append("InC: " + reader["signinComputer"]);
-                output.Append(" - ");
-                output.Append("OutC: " + reader["signoutComputer"]);
-                output.Append(Environment.NewLine);
-            }
-            reader.Close();
-
-            output.Append(Environment.NewLine);
-
-            sql = "select * from TimePunchUserIdentities order by userIdentity";
-
-            SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
-            SQLiteDataReader reader2 = command2.ExecuteReader();
-
-            while (reader2.Read())
-            {
-                output.Append("ID: " + reader2["userIdentity"]);
-                output.Append(" - ");
-                output.Append("Password: " + reader2["userPassword"]);
-                output.Append(" - ");
-                output.Append("isAdmin: " + reader2["isAdmin"]);
-                output.Append(" - ");
-                output.Append("timeStamp: " + reader2["createUnixTimeStamp"]);
-                output.Append(Environment.NewLine);
-            }
-            reader2.Close();
-
-            output.Append(Environment.NewLine);
-
-            txtDataResults.Text = output.ToString();
         }
         void createVersionTable()
         {
@@ -639,22 +576,24 @@ namespace TimePunch
 
                 while (reader.Read())
                 {
-                    Int32 signOut = Int32.Parse(reader["signoutUnixTime"].ToString());
-                    Int32 signIn = Int32.Parse(reader["signinUnixTime"].ToString());
-                    secondsTotal += (signOut - signIn);
+                    Punch punch = new Punch();
 
-                    output.Append("ID: " + reader["userIdentity"]);
+                    punch.SignoutUnixTime = Int32.Parse(reader["signoutUnixTime"].ToString());
+                    punch.SigninUnixTime = Int32.Parse(reader["signinUnixTime"].ToString());
+                    punch.UserIdentity = reader["userIdentity"].ToString();
+                    punch.ManualPunch = Int32.Parse(reader["manualPunch"].ToString());
+                    punch.CreateUnixTimeStamp = Int32.Parse(reader["createUnixTimeStamp"].ToString());
+
+                    secondsTotal += (punch.SignoutUnixTime - punch.SigninUnixTime);
+
+                    output.Append("ID: " + punch.UserIdentity);
                     output.Append(" - ");
-                    //output.Append("In SQL: " + reader["dtSignIn"]);
-                    //output.Append(" - ");
-                    output.Append("In Date: " + convertUnixDateTimeToDisplayDateTime(reader["signinUnixTime"].ToString()));
+                    output.Append("In Date: " + convertUnixDateTimeToDisplayDateTime(punch.SigninUnixTime.ToString()));
                     output.Append(" - ");
-                    //output.Append("Out SQL: " + reader["dtSignOut"]);
-                    //output.Append(" - ");
-                    output.Append("Out Date: " + convertUnixDateTimeToDisplayDateTime(reader["signoutUnixTime"].ToString()));
+                    output.Append("Out Date: " + convertUnixDateTimeToDisplayDateTime(punch.SignoutUnixTime.ToString()));
                     output.Append(" - ");
                     output.Append("Manual: ");
-                    if (reader["manualPunch"].ToString() == "1")
+                    if (punch.ManualPunch == 1)
                     {
                         output.Append("true");
                     }
@@ -665,16 +604,16 @@ namespace TimePunch
 
                     output.Append(" - ");
                     output.Append("Minutes: ");
-                    output.Append(((signOut - signIn) / 60).ToString());
+                    output.Append(((punch.SignoutUnixTime - punch.SigninUnixTime) / 60).ToString());
 
                     output.Append(Environment.NewLine);
 
                     grdUserHours.Rows.Add(new object[] {
-                        reader["userIdentity"].ToString(),
-                        convertUnixDateTimeToDisplayDateTime(reader["signinUnixTime"].ToString()),
-                        convertUnixDateTimeToDisplayDateTime(reader["signoutUnixTime"].ToString()),
-                        reader["createUnixTimeStamp"].ToString(),
-                        reader["manualPunch"].ToString()
+                        punch.UserIdentity,
+                        convertUnixDateTimeToDisplayDateTime(punch.SigninUnixTime.ToString()),
+                        convertUnixDateTimeToDisplayDateTime(punch.SignoutUnixTime.ToString()),
+                        punch.CreateUnixTimeStamp.ToString(),
+                        punch.ManualPunch.ToString()
                     });
 
                 }
@@ -711,15 +650,19 @@ namespace TimePunch
             {
                 ListViewItem xx = (ListViewItem)cboUsers.SelectedItem;
 
-                string userIdentity = xx.Tag.ToString();
-                string signinType = "";
+                // create punch placeholder for update/add punch
+                Punch modPunch = new Punch();
+                modPunch.ManualPunch = 1;
+
+                modPunch.UserIdentity = xx.Tag.ToString();
+
                 if (rdLab.Checked)
                 {
-                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
+                    modPunch.SigninType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
                 }
                 else
                 {
-                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
+                    modPunch.SigninType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
                 }
 
                 // Make a connection to the database if it hasnt already
@@ -727,7 +670,7 @@ namespace TimePunch
 
                 // grab the records for the day selected
                 string sql = "select *, datetime(signinUnixTime, 'unixepoch', 'localtime') dtSignIn, datetime(signoutUnixTime, 'unixepoch', 'localtime') dtSignOut  from TimePunchEvents " +
-                    " where userIdentity = '" + userIdentity + "' and signinType = '" + signinType + "' " +
+                    " where userIdentity = '" + modPunch.UserIdentity + "' and signinType = '" + modPunch.SigninType + "' " +
                     " and signinYear = " + dtUpdateHours.Value.Year.ToString() +
                     " and signinMonth = " + dtUpdateHours.Value.Month.ToString() +
                     " and signinDay = " + dtUpdateHours.Value.Day.ToString() +
@@ -736,6 +679,7 @@ namespace TimePunch
                 SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
                 SQLiteDataReader reader = command.ExecuteReader();
                 StringBuilder output = new StringBuilder();
+
                 Int32 checkInUX = 0;
                 Int32 checkOutUX = 0;
                 bool manualFound = false;
@@ -745,46 +689,57 @@ namespace TimePunch
 
                 while (reader.Read())
                 {
-                    checkInUX = Int32.Parse(reader["signinUnixTime"].ToString());
-                    checkOutUX = Int32.Parse(reader["signoutUnixTime"].ToString());
-                    uniqueKey = Int32.Parse(reader["updateUnixTimeStamp"].ToString()); ;
+                    Punch punch = new Punch();
+
+                    punch.SignoutUnixTime = Int32.Parse(reader["signoutUnixTime"].ToString());
+                    punch.SigninUnixTime = Int32.Parse(reader["signinUnixTime"].ToString());
+                    punch.UserIdentity = reader["userIdentity"].ToString();
+                    punch.ManualPunch = Int32.Parse(reader["manualPunch"].ToString());
+                    punch.CreateUnixTimeStamp = Int32.Parse(reader["createUnixTimeStamp"].ToString());
+                    punch.UpdateUnixTimeStamp = Int32.Parse(reader["updateUnixTimeStamp"].ToString());
+
+                    checkInUX = punch.SigninUnixTime;
+                    checkOutUX = punch.SignoutUnixTime;
+                    uniqueKey = punch.UpdateUnixTimeStamp;
                     // check to see if a manual punch already exists, and store this off seperately
-                    if (reader["manualPunch"].ToString() == "1")
+                    if (punch.ManualPunch == 1)
                     {
                         manualFound = true;
-                        checkInUXManual = checkInUX;
+                        checkInUXManual = punch.SigninUnixTime;
                         checkOutUXManual = checkOutUX;
-                        uniqueKey = Int32.Parse(reader["updateUnixTimeStamp"].ToString()); ;
+                        uniqueKey = punch.UpdateUnixTimeStamp;
                     }
                 }
                 reader.Close();
 
                 //Prep our inputs
-                // grab a timestamp
-                Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
 
                 //get admin id from the form
-                string adminIdentity = AdminUserID;
-                Int32 nowStamp = unixTimestamp;
+                modPunch.AdminIdentity = AdminUserID;
+
+                modPunch.UpdateUnixTimeStamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                modPunch.CreateUnixTimeStamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+
                 //get computer name from somewhere
-                string signInComputer = System.Environment.MachineName;
-                string signOutComputer = System.Environment.MachineName;
+                modPunch.SigninComputer = System.Environment.MachineName;
+                modPunch.SignoutComputer = System.Environment.MachineName;
 
                 if (manualFound)
                 {
                     //Just update the existing manual record, so we assume there is only one manual punch per day
-                    Int32 updateSignOutTime = checkInUXManual + Int32.Parse(txtMinutesToAdd.Text) * 60;
-                    string sql3 = "update TimePunchEvents set" +
-                        " adminIdentity = '" + adminIdentity + "', " +
-                        " signoutUnixTime = " + updateSignOutTime.ToString() + ", " +
-                        " signoutComputer = '" + signOutComputer + "', " +
-                        " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
-                        " where userIdentity = '" + userIdentity + "' " +
-                        " and updateUnixTimeStamp = " + uniqueKey.ToString() +
-                        " and signinType = '" + signinType + "'";
+                    modPunch.SignoutUnixTime = checkInUXManual + Int32.Parse(txtMinutesToAdd.Text) * 60;
 
-                    SQLiteCommand command3 = new SQLiteCommand(sql3, m_dbConnection);
-                    log.Info("SQL: " + sql3.Replace(Environment.NewLine, " "));
+                    string sql3x = "update TimePunchEvents set" +
+                        " adminIdentity = '" + modPunch.AdminIdentity + "', " +
+                        " signoutUnixTime = " + modPunch.SignoutUnixTime + ", " +
+                        " signoutComputer = '" + modPunch.SignoutComputer + "', " +
+                        " updateUnixTimeStamp = " + modPunch.UpdateUnixTimeStamp + " " +
+                        " where userIdentity = '" + modPunch.UserIdentity + "' " +
+                        " and updateUnixTimeStamp = " + uniqueKey.ToString() +
+                        " and signinType = '" + modPunch.SigninType + "'";
+
+                    SQLiteCommand command3 = new SQLiteCommand(sql3x, m_dbConnection);
+                    log.Info("SQL: " + sql3x.Replace(Environment.NewLine, " "));
                     command3.ExecuteNonQuery();
                 }
                 else
@@ -798,22 +753,22 @@ namespace TimePunch
                     // add a manual record
 
                     // Manual time punches should be at some arbitrary time for the given amount of time.
-                    Int32 signInTime = 0;
+                    
                     if (checkOutUX > 0)
                     {
                         // just add a minute to the last punch for our manual punch start time
-                        signInTime = checkOutUX + 60;
+                        modPunch.SigninUnixTime = checkOutUX + 60;
                     }
                     else
                     {
                         //we dont have a punch for this day so we need to create a sign in time, and we will just use the time on the date picker
-                        signInTime = (Int32)(dtUpdateHours.Value.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                        modPunch.SigninUnixTime = (Int32)(dtUpdateHours.Value.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
                     }
 
                     // Add or subtract the minutes
-                    Int32 signOutTime = signInTime + Int32.Parse(txtMinutesToAdd.Text) * 60;
+                    modPunch.SignoutUnixTime = modPunch.SigninUnixTime + Int32.Parse(txtMinutesToAdd.Text) * 60;
 
-                    string sql2 = "insert into TimePunchEvents" +
+                    string sql2x = "insert into TimePunchEvents" +
                         " (" +
                         " userIdentity, " +
                         " adminIdentity, " +
@@ -833,28 +788,27 @@ namespace TimePunch
                         " updateUnixTimeStamp" +
                         " ) values " +
                         " (" +
-                        " '" + userIdentity + "', " +
-                        " '" + adminIdentity + "', " +
-                        " 1, " +
-                        signInTime.ToString() + ", " +
-                        signOutTime.ToString() + ", " +
-                        convertUnixDateTimeToYear(signInTime.ToString()) + ", " +
-                        convertUnixDateTimeToMonth(signInTime.ToString()) + ", " +
-                        convertUnixDateTimeToDay(signInTime.ToString()) + ", " +
-                        convertUnixDateTimeToYear(signOutTime.ToString()) + ", " +
-                        convertUnixDateTimeToMonth(signOutTime.ToString()) + ", " +
-                        convertUnixDateTimeToDay(signOutTime.ToString()) + ", " +
-                        " '" + signinType + "', " +
-                        " '" + signInComputer + "', " +
-                        " '" + signOutComputer + "', " +
-                        nowStamp.ToString() + ", " +
-                        nowStamp.ToString() +
+                        " '" + modPunch.UserIdentity + "', " +
+                        " '" + modPunch.AdminIdentity + "', " +
+                        " " + modPunch.ManualPunch + ", " +
+                        modPunch.SigninUnixTime + ", " +
+                        modPunch.SignoutUnixTime + ", " +
+                        convertUnixDateTimeToYear(modPunch.SigninUnixTime.ToString()) + ", " +
+                        convertUnixDateTimeToMonth(modPunch.SigninUnixTime.ToString()) + ", " +
+                        convertUnixDateTimeToDay(modPunch.SigninUnixTime.ToString()) + ", " +
+                        convertUnixDateTimeToYear(modPunch.SignoutUnixTime.ToString()) + ", " +
+                        convertUnixDateTimeToMonth(modPunch.SignoutUnixTime.ToString()) + ", " +
+                        convertUnixDateTimeToDay(modPunch.SignoutUnixTime.ToString()) + ", " +
+                        " '" + modPunch.SigninType + "', " +
+                        " '" + modPunch.SigninComputer + "', " +
+                        " '" + modPunch.SignoutComputer + "', " +
+                        modPunch.CreateUnixTimeStamp + ", " +
+                        modPunch.UpdateUnixTimeStamp +
                         " ) ";
 
-                    SQLiteCommand command2 = new SQLiteCommand(sql2, m_dbConnection);
-                    log.Info("SQL: " + sql2.Replace(Environment.NewLine, " "));
+                    SQLiteCommand command2 = new SQLiteCommand(sql2x, m_dbConnection);
+                    log.Info("SQL: " + sql2x.Replace(Environment.NewLine, " "));
                     command2.ExecuteNonQuery();
-
                 }
 
                 // update the results
@@ -1283,7 +1237,7 @@ namespace TimePunch
                 // overwrite the destination file if it already exists.
                 System.IO.File.Copy(sourceFile, destFile, true);
 
-                MessageBox.Show("Log Files Copied", "Info");
+                MessageBox.Show("Database Copied", "Info");
 
                 connectToDatabase();
 
