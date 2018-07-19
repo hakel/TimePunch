@@ -129,6 +129,7 @@ namespace TimePunch
                 " (" +
                 " userIdentity varchar(20), " +
                 " userPassword varchar(20), " +
+                " userFingerprint text, " +
                 " isAdmin int, " +
                 " createUnixTimeStamp int, " +
                 " updateUnixTimeStamp int " +
@@ -148,6 +149,7 @@ namespace TimePunch
                 " (" +
                 " userIdentity, " +
                 " userPassword, " +
+                " userFingerprint, " +
                 " isAdmin, " +
                 " createUnixTimeStamp, " +
                 " updateUnixTimeStamp" +
@@ -155,6 +157,7 @@ namespace TimePunch
                 " (" +
                 " '" + AdminUserID + "', " +
                 " '" + AdminUserPassword + "', " +
+                 "'', " +
                  "1, " +
                 unixTimestamp.ToString() + ", " +
                 unixTimestamp.ToString() +

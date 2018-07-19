@@ -684,6 +684,7 @@ namespace TimePunch
                 //TODO - i should pass the db info so it doesnt have to be in the form directly
                 // this is a first time setup, so show the admin screen
                 var newUserForm = new frmUserInfo();
+                newUserForm.isUpdate = false;
 
                 newUserForm.ShowDialog(this);
 
@@ -741,6 +742,39 @@ namespace TimePunch
 
         private void lblLoggedInAs_Click(object sender, EventArgs e)
         {
+
+        }
+
+        private void btnFingerprintLogin_Click(object sender, EventArgs e)
+        {
+            log.Debug("IN");
+
+            try
+            {
+
+                //TODO - i should pass the db info so it doesnt have to be in the form directly
+                // this is a first time setup, so show the admin screen
+                var newUserForm = new frmFingerPrintLogin();
+
+                newUserForm.ShowDialog(this);
+
+                // grab the user from the form
+                string xxx = newUserForm.userIDForForm;
+
+                //TODO - auto log them in
+                if(xxx != "")
+                {
+                    log.Info("Fingerprint login for : " + xxx);
+                    txtUserID.Text = xxx;
+                    txtUserID.Tag = txtUserID.Text;
+                    txtPassword.Select();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
 
         }
     }

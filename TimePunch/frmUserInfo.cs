@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Configuration;
+using FlexCodeSDK;
 
 namespace TimePunch
 {
@@ -18,6 +19,9 @@ namespace TimePunch
         private string connectionString = "Data Source=" + ConfigurationManager.AppSettings["dbFileName"].ToString() + ";Version=3;";
 
         SQLiteConnection m_dbConnection;
+
+        FlexCodeSDK.FinFPReg reg;
+        string fingerprint = "";
 
         public string userIDForForm = "";
         public bool isUpdate = false;
@@ -88,12 +92,21 @@ namespace TimePunch
                 if (isUpdate)
                 {
 
-                    // update password
                     string sql = "update TimePunchUserIdentities set" +
                         " userPassword = '" + newUserPassword + "', " +
                         " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
                         " where userIdentity = '" + newUserID + "' ";
 
+                    // update password
+                    if (fingerprint != "")
+                    {
+                        sql = "update TimePunchUserIdentities set" +
+                            " userPassword = '" + newUserPassword + "', " +
+                            " userFingerprint = '" + fingerprint + "', " +
+                            " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
+                            " where userIdentity = '" + newUserID + "' ";
+                        
+                    }
                     SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
                     log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
                     command.ExecuteNonQuery();
@@ -118,11 +131,12 @@ namespace TimePunch
                 }
                 else
                 {
-                    // add the user
+                    // add the user 
                     string sql = "insert into TimePunchUserIdentities" +
                         " (" +
                         " userIdentity, " +
                         " userPassword, " +
+                        " userFingerprint, " +
                         " isAdmin, " +
                         " createUnixTimeStamp, " +
                         " updateUnixTimeStamp" +
@@ -130,6 +144,7 @@ namespace TimePunch
                         " (" +
                         " '" + newUserID + "', " +
                         " '" + newUserPassword + "', " +
+                        " '" + fingerprint + "', " +
                          "0, " +
                         unixTimestamp.ToString() + ", " +
                         unixTimestamp.ToString() +
@@ -167,7 +182,8 @@ namespace TimePunch
                     MessageBox.Show("User Created!", "Info");
 
                 }
-
+                // reset the fingerprint
+                fingerprint = "";
                 // Close the form and pass back the user id and prefill it if possible
                 userIDForForm = newUserID;
                 this.Close();
@@ -258,6 +274,19 @@ namespace TimePunch
 
                     }
                 }
+
+                lblFingerprintCount.Text = "";
+
+                //Initialize FlexCodeSDK for Registration
+                //1. Initialize Event Handler
+                reg = new FlexCodeSDK.FinFPReg();
+                reg.FPSamplesNeeded += new __FinFPReg_FPSamplesNeededEventHandler(reg_FPSamplesNeeded);
+                reg.FPRegistrationTemplate += new __FinFPReg_FPRegistrationTemplateEventHandler(reg_FPRegistrationTemplate);
+                reg.FPRegistrationStatus += new __FinFPReg_FPRegistrationStatusEventHandler(reg_FPRegistrationStatus);
+
+                //2. Input the activation code
+                reg.AddDeviceInfo("HY20E20453", "996E93F0285F7D1", "2M13A7D9A0CF41DB625AB1ED");
+
             }
             catch (Exception ex)
             {
@@ -266,6 +295,83 @@ namespace TimePunch
             }
 
         }
+
+        private void btnFingerprint_Click(object sender, EventArgs e)
+        {
+            log.Debug("IN");
+
+            try
+            {
+
+                if (txtUserID.Text == "")
+                {
+                    MessageBox.Show("Please enter ID before recording fingerprint.");
+                }
+                else
+                {
+                    btnFingerprint.Enabled = false;
+                    reg.FPRegistrationStart("MySecretKey" + txtUserID.Text);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+
+        }
+        void reg_FPSamplesNeeded(short Samples)
+        {
+            log.Debug("IN");
+
+            try
+            {
+                lblFingerprintCount.Text = "Samples Needed : " + Convert.ToString(Samples);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+        }
+        void reg_FPRegistrationTemplate(string FPTemplate)
+        {
+            log.Debug("IN");
+
+            try
+            {
+                fingerprint = FPTemplate;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+        }
+        void reg_FPRegistrationStatus(RegistrationStatus Status)
+        {
+
+            log.Debug("IN");
+
+            try
+            {
+                log.Debug("Status:" + Status.ToString());
+
+                if (Status == RegistrationStatus.r_OK)
+                {
+                    MessageBox.Show("Fingerprint Recorded!", "Info");
+                    string preview = fingerprint;
+                    lblFingerprintCount.Text = "Fingerprint recorded.";
+                    btnFingerprint.Enabled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+        }
+
     }
 
 

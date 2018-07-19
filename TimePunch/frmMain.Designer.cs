@@ -42,6 +42,7 @@
             this.lblLastFullPunch = new System.Windows.Forms.Label();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.grpLogin = new System.Windows.Forms.GroupBox();
+            this.btnFingerprintLogin = new System.Windows.Forms.Button();
             this.btnLogOut = new System.Windows.Forms.Button();
             this.rdTheory = new System.Windows.Forms.RadioButton();
             this.rdLab = new System.Windows.Forms.RadioButton();
@@ -150,6 +151,7 @@
             // 
             // grpLogin
             // 
+            this.grpLogin.Controls.Add(this.btnFingerprintLogin);
             this.grpLogin.Controls.Add(this.txtUserID);
             this.grpLogin.Controls.Add(this.label1);
             this.grpLogin.Controls.Add(this.txtPassword);
@@ -163,6 +165,16 @@
             this.grpLogin.TabStop = false;
             this.grpLogin.Text = "Login";
             this.grpLogin.Enter += new System.EventHandler(this.groupBox1_Enter);
+            // 
+            // btnFingerprintLogin
+            // 
+            this.btnFingerprintLogin.Location = new System.Drawing.Point(119, 65);
+            this.btnFingerprintLogin.Name = "btnFingerprintLogin";
+            this.btnFingerprintLogin.Size = new System.Drawing.Size(100, 23);
+            this.btnFingerprintLogin.TabIndex = 14;
+            this.btnFingerprintLogin.Text = "Fingerprint Login";
+            this.btnFingerprintLogin.UseVisualStyleBackColor = true;
+            this.btnFingerprintLogin.Click += new System.EventHandler(this.btnFingerprintLogin_Click);
             // 
             // btnLogOut
             // 
@@ -289,6 +301,7 @@
         private System.Windows.Forms.MenuStrip mnuMain;
         private System.Windows.Forms.ToolStripMenuItem mnuAdmin;
         private System.Windows.Forms.ToolStripMenuItem mnuNewUser;
+        private System.Windows.Forms.Button btnFingerprintLogin;
     }
 }
 

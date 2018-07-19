@@ -41,6 +41,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.txtGrade = new System.Windows.Forms.TextBox();
+            this.btnFingerprint = new System.Windows.Forms.Button();
+            this.lblFingerprintCount = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnCreateUser
@@ -151,11 +153,32 @@
             this.txtGrade.Size = new System.Drawing.Size(100, 20);
             this.txtGrade.TabIndex = 3;
             // 
+            // btnFingerprint
+            // 
+            this.btnFingerprint.Location = new System.Drawing.Point(118, 153);
+            this.btnFingerprint.Name = "btnFingerprint";
+            this.btnFingerprint.Size = new System.Drawing.Size(100, 23);
+            this.btnFingerprint.TabIndex = 27;
+            this.btnFingerprint.Text = "Fingerprint";
+            this.btnFingerprint.UseVisualStyleBackColor = true;
+            this.btnFingerprint.Click += new System.EventHandler(this.btnFingerprint_Click);
+            // 
+            // lblFingerprintCount
+            // 
+            this.lblFingerprintCount.AutoSize = true;
+            this.lblFingerprintCount.Location = new System.Drawing.Point(118, 183);
+            this.lblFingerprintCount.Name = "lblFingerprintCount";
+            this.lblFingerprintCount.Size = new System.Drawing.Size(35, 13);
+            this.lblFingerprintCount.TabIndex = 28;
+            this.lblFingerprintCount.Text = "label7";
+            // 
             // frmUserInfo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(243, 194);
+            this.ClientSize = new System.Drawing.Size(243, 204);
+            this.Controls.Add(this.lblFingerprintCount);
+            this.Controls.Add(this.btnFingerprint);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.txtGrade);
             this.Controls.Add(this.label5);
@@ -197,5 +220,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox txtGrade;
+        private System.Windows.Forms.Button btnFingerprint;
+        private System.Windows.Forms.Label lblFingerprintCount;
     }
 }
