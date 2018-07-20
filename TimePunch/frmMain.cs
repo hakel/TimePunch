@@ -34,6 +34,8 @@ namespace TimePunch
         private string connectionString = "Data Source=" + ConfigurationManager.AppSettings["dbFileName"].ToString() + ";Version=3;";
         SQLiteConnection m_dbConnection;
 
+        private bool skipPassword = false;
+
         public frmMain()
         {
             InitializeComponent();
@@ -210,7 +212,6 @@ namespace TimePunch
             try
             {
 
-
                 // Login
                 string userIdentity = txtUserID.Text;
                 string userPassword = txtPassword.Text;
@@ -237,6 +238,11 @@ namespace TimePunch
                     {
                         dbUserID = reader1["userIdentity"].ToString();
                         dbUserPassword = reader1["userPassword"].ToString();
+                        // set the local password to the real password if we are skipping, so they will match
+                        if (skipPassword)
+                        {
+                            userPassword = dbUserPassword;
+                        }
                         dbAdminFlag = int.Parse(reader1["isAdmin"].ToString());
                         foundLogin = true;
                     }
@@ -445,6 +451,7 @@ namespace TimePunch
             //grpType.Enabled = btnLogin.Visible;
             rdLab.Enabled = btnLogin.Visible;
             rdTheory.Enabled = btnLogin.Visible;
+            skipPassword = false;
         }
 
         private void timer_Tick(object sender, EventArgs e)
@@ -768,6 +775,9 @@ namespace TimePunch
                     txtUserID.Text = xxx;
                     txtUserID.Tag = txtUserID.Text;
                     txtPassword.Select();
+                    skipPassword = true;
+                    btnLogin_Click(sender, e);
+                    skipPassword = false;
                 }
             }
             catch (Exception ex)

@@ -82,6 +82,7 @@ namespace TimePunch
                 {
                     MessageBox.Show("Fingerprint found for: " + userIDForForm, "Success");
                     ver.FPVerificationStop();
+                    this.Close();
                 }
                 else if (Status == VerificationStatus.v_NotMatch)
                 {
