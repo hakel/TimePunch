@@ -815,7 +815,8 @@ namespace TimePunch
                 }
 
                 // update the results
-                btnShowDateMinutes_Click(sender, e);
+                //btnShowDateMinutes_Click(sender, e);
+                btnShowDateMinutes.PerformClick();
 
             }
             catch (Exception ex)

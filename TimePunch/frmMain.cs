@@ -761,23 +761,61 @@ namespace TimePunch
 
                 //TODO - i should pass the db info so it doesnt have to be in the form directly
                 // this is a first time setup, so show the admin screen
-                var newUserForm = new frmFingerPrintLogin();
+                var fingerprintForm = new frmFingerPrintLogin();
 
-                newUserForm.ShowDialog(this);
+                fingerprintForm.ShowDialog(this);
 
                 // grab the user from the form
-                string xxx = newUserForm.userIDForForm;
+                string userID = fingerprintForm.userIDForForm;
 
-                //TODO - auto log them in
-                if(xxx != "")
+                // auto log them in
+                if(userID != "")
                 {
-                    log.Info("Fingerprint login for : " + xxx);
-                    txtUserID.Text = xxx;
+                    log.Info("Fingerprint login for : " + userID);
+                    txtUserID.Text = userID;
                     txtUserID.Tag = txtUserID.Text;
-                    txtPassword.Select();
+                    txtPassword.Text = "";
                     skipPassword = true;
-                    btnLogin_Click(sender, e);
+                    //btnLogin_Click(sender, e);
+                    btnLogin.PerformClick();
                     skipPassword = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
+
+        }
+
+        private void btnTouchLogin_Click(object sender, EventArgs e)
+        {
+            log.Debug("IN");
+
+            try
+            {
+
+                //TODO - i should pass the db info so it doesnt have to be in the form directly
+                // this is a first time setup, so show the admin screen
+                var touchForm = new frmTouchLogin();
+
+                touchForm.ShowDialog(this);
+
+                // grab the user from the form
+                string userID = touchForm.userIDForForm;
+                string userPWD = touchForm.userPWDForForm;
+                
+                //auto log them in
+                if (userID != "")
+                {
+                    log.Info("Touch login for : " + userID);
+                    txtUserID.Text = userID;
+                    txtUserID.Tag = txtUserID.Text;
+                    txtPassword.Text = userPWD;
+                    skipPassword = false;
+                    btnLogin.PerformClick();
+                    //btnLogin_Click(sender, e);
                 }
             }
             catch (Exception ex)

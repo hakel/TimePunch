@@ -50,6 +50,7 @@
             this.mnuMain = new System.Windows.Forms.MenuStrip();
             this.mnuNewUser = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAdmin = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnTouchLogin = new System.Windows.Forms.Button();
             this.grpLogin.SuspendLayout();
             this.grpType.SuspendLayout();
             this.mnuMain.SuspendLayout();
@@ -57,7 +58,7 @@
             // 
             // btnPunchIn
             // 
-            this.btnPunchIn.Location = new System.Drawing.Point(18, 228);
+            this.btnPunchIn.Location = new System.Drawing.Point(18, 252);
             this.btnPunchIn.Name = "btnPunchIn";
             this.btnPunchIn.Size = new System.Drawing.Size(75, 23);
             this.btnPunchIn.TabIndex = 3;
@@ -99,7 +100,7 @@
             // 
             // btnPunchOut
             // 
-            this.btnPunchOut.Location = new System.Drawing.Point(18, 259);
+            this.btnPunchOut.Location = new System.Drawing.Point(18, 283);
             this.btnPunchOut.Name = "btnPunchOut";
             this.btnPunchOut.Size = new System.Drawing.Size(75, 23);
             this.btnPunchOut.TabIndex = 4;
@@ -120,7 +121,7 @@
             // lblPunchIn
             // 
             this.lblPunchIn.AutoSize = true;
-            this.lblPunchIn.Location = new System.Drawing.Point(99, 234);
+            this.lblPunchIn.Location = new System.Drawing.Point(99, 258);
             this.lblPunchIn.Name = "lblPunchIn";
             this.lblPunchIn.Size = new System.Drawing.Size(34, 13);
             this.lblPunchIn.TabIndex = 9;
@@ -129,7 +130,7 @@
             // lblPunchOut
             // 
             this.lblPunchOut.AutoSize = true;
-            this.lblPunchOut.Location = new System.Drawing.Point(99, 265);
+            this.lblPunchOut.Location = new System.Drawing.Point(99, 289);
             this.lblPunchOut.Name = "lblPunchOut";
             this.lblPunchOut.Size = new System.Drawing.Size(34, 13);
             this.lblPunchOut.TabIndex = 10;
@@ -138,7 +139,7 @@
             // lblLastFullPunch
             // 
             this.lblLastFullPunch.AutoSize = true;
-            this.lblLastFullPunch.Location = new System.Drawing.Point(6, 295);
+            this.lblLastFullPunch.Location = new System.Drawing.Point(6, 319);
             this.lblLastFullPunch.Name = "lblLastFullPunch";
             this.lblLastFullPunch.Size = new System.Drawing.Size(157, 13);
             this.lblLastFullPunch.TabIndex = 11;
@@ -151,6 +152,7 @@
             // 
             // grpLogin
             // 
+            this.grpLogin.Controls.Add(this.btnTouchLogin);
             this.grpLogin.Controls.Add(this.btnFingerprintLogin);
             this.grpLogin.Controls.Add(this.txtUserID);
             this.grpLogin.Controls.Add(this.label1);
@@ -160,7 +162,7 @@
             this.grpLogin.Controls.Add(this.btnLogOut);
             this.grpLogin.Location = new System.Drawing.Point(9, 120);
             this.grpLogin.Name = "grpLogin";
-            this.grpLogin.Size = new System.Drawing.Size(227, 99);
+            this.grpLogin.Size = new System.Drawing.Size(227, 126);
             this.grpLogin.TabIndex = 14;
             this.grpLogin.TabStop = false;
             this.grpLogin.Text = "Login";
@@ -247,11 +249,21 @@
             this.mnuAdmin.Text = "Admin";
             this.mnuAdmin.Click += new System.EventHandler(this.mnuAdmin_Click);
             // 
+            // btnTouchLogin
+            // 
+            this.btnTouchLogin.Location = new System.Drawing.Point(119, 94);
+            this.btnTouchLogin.Name = "btnTouchLogin";
+            this.btnTouchLogin.Size = new System.Drawing.Size(100, 23);
+            this.btnTouchLogin.TabIndex = 19;
+            this.btnTouchLogin.Text = "Touch Login";
+            this.btnTouchLogin.UseVisualStyleBackColor = true;
+            this.btnTouchLogin.Click += new System.EventHandler(this.btnTouchLogin_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(353, 319);
+            this.ClientSize = new System.Drawing.Size(353, 342);
             this.Controls.Add(this.grpType);
             this.Controls.Add(this.grpLogin);
             this.Controls.Add(this.lblLastFullPunch);
@@ -302,6 +314,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuAdmin;
         private System.Windows.Forms.ToolStripMenuItem mnuNewUser;
         private System.Windows.Forms.Button btnFingerprintLogin;
+        private System.Windows.Forms.Button btnTouchLogin;
     }
 }
 
