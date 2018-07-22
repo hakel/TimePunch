@@ -159,7 +159,6 @@ namespace TimePunch
         {
             System.Windows.Forms.Button thisButton = (System.Windows.Forms.Button)sender;
             txtPassword.Text = txtPassword.Text + thisButton.Tag.ToString();
-            btnDummy.PerformClick();
 
         }
 

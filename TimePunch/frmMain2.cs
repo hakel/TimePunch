@@ -27,7 +27,7 @@ using System.Configuration;
 
 namespace TimePunch
 {
-    public partial class frmMain : Form
+    public partial class frmMain2 : Form
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -36,12 +36,12 @@ namespace TimePunch
 
         private bool skipPassword = false;
 
-        public frmMain()
+        public frmMain2()
         {
             InitializeComponent();
         }
 
-        private void frmMain_Load(object sender, EventArgs e)
+        private void frmMain2_Load(object sender, EventArgs e)
         {
             log.Debug("IN");
 
@@ -633,7 +633,7 @@ namespace TimePunch
 
         }
 
-        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        private void frmMain2_FormClosing(object sender, FormClosingEventArgs e)
         {
             log.Debug("IN");
 
