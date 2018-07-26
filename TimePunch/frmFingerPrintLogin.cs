@@ -80,13 +80,15 @@ namespace TimePunch
 
                 if (Status == VerificationStatus.v_OK)
                 {
-                    MessageBox.Show("Fingerprint found for: " + userIDForForm, "Success");
+                    log.Info("Fingerprint found for: " + userIDForForm);
+                    //MessageBox.Show("Fingerprint found for: " + userIDForForm, "Success");
                     ver.FPVerificationStop();
                     this.Close();
                 }
                 else if (Status == VerificationStatus.v_NotMatch)
                 {
                     MessageBox.Show("Fingerprint did not match any users on record.", "No Match");
+                    log.Info("Fingerprint did not match any users on record.");
                     //ver.FPVerificationStop();
                 }
             }

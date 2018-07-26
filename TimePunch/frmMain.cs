@@ -112,6 +112,70 @@ namespace TimePunch
             }
         }
 
+        Int32 normalPunchOUT(string userIdentity, string signinType)
+        {
+            log.Debug("IN");
+
+            // grab a timestamp
+            Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+
+            // grab the last punch in
+            // Get the last punch
+            string sql = "select * from TimePunchEvents where userIdentity = '" + userIdentity + "' and signinType = '" + signinType + "' and manualPunch = 0 order by createUnixTimeStamp desc";
+
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            SQLiteDataReader reader = command.ExecuteReader();
+            StringBuilder output = new StringBuilder();
+
+            bool found = false;
+            string signInTime = "";
+            string signOutTime = "";
+
+            while (reader.Read() && !found)
+            {
+                signInTime = reader["signinUnixTime"].ToString();
+                signOutTime = reader["signoutUnixTime"].ToString();
+                found = true;
+            }
+            reader.Close();
+
+            // logic here is if sign out and in time are equal, they have not yet signed out
+            if (found && signOutTime == signInTime)
+            {
+                //dont need to do anything here, we have the data we need from above
+            }
+            else
+            {
+                // throw an error here, you shouldnt have the ability to sign out if there is no sign in
+                MessageBox.Show("No valid sign in found", "Info");
+                return 0;
+            }
+
+            // do the punch out
+            string adminIdentity = "";
+            signOutTime = unixTimestamp.ToString();
+            string signOutComputer = System.Environment.MachineName;
+
+            sql = "update TimePunchEvents set" +
+                " adminIdentity = '" + adminIdentity + "', " +
+                " signoutUnixTime = " + signOutTime.ToString() + ", " +
+                " signoutYear = " + convertUnixDateTimeToYear(signOutTime.ToString()) + ", " +
+                " signoutMonth = " + convertUnixDateTimeToMonth(signOutTime.ToString()) + ", " +
+                " signoutDay = " + convertUnixDateTimeToDay(signOutTime.ToString()) + ", " +
+                " signoutComputer = '" + signOutComputer + "', " +
+                " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
+                " where userIdentity = '" + userIdentity + "' " +
+                " and signinUnixTime = " + signInTime +
+                " and signinType = '" + signinType + "'";
+
+            SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
+            command2.ExecuteNonQuery();
+
+            return unixTimestamp;
+
+        }
+
         Int32 normalPunchIN(string userIdentity, string signinType)
         {
             log.Debug("IN");
@@ -168,40 +232,6 @@ namespace TimePunch
             log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
             command.ExecuteNonQuery();
             return signInTime;
-
-        }
-
-        private void btnPunchIn_Click(object sender, EventArgs e)
-        {
-            log.Debug("IN");
-
-            try
-            {
-                //string userIdentity = txtUserID.Text;
-                string userIdentity = txtUserID.Tag.ToString();
-                string signinType = "";
-                if (rdLab.Checked)
-                {
-                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
-                }
-                else
-                {
-                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
-                }
-
-                Int32 punchtime = normalPunchIN(userIdentity, signinType);
-
-                // show modal that you are logged in
-                MessageBox.Show("Clocked In! - " + convertUnixDateTimeToDisplayDateTime(punchtime.ToString()),"Info");
-
-                logOut();
-                //defaultUIElements();
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error", ex);
-                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
-            }
 
         }
 
@@ -293,19 +323,9 @@ namespace TimePunch
                     return;
                 }
 
-                // Validate that they selected a punch type
-                if (!rdLab.Checked && !rdTheory.Checked && dbAdminFlag == 0)
-                {
-                    MessageBox.Show("You must select " + rdLab.Text + " or " + rdTheory.Text + " before logging in.", "Info");
-                    return;
-                }
-
                 mnuAdmin.Visible = (dbAdminFlag == 1);
                 btnLogOut.Visible = true;
                 btnLogin.Visible = false;
-                //grpType.Enabled = btnLogin.Visible;
-                rdLab.Enabled = btnLogin.Visible;
-                rdTheory.Enabled = btnLogin.Visible;
 
                 if (dbAdminFlag == 1)
                 {
@@ -318,17 +338,16 @@ namespace TimePunch
 
                     adminForm.ShowDialog(this);
 
-                    // reset the form
-                    defaultUIElements();
-                    txtUserID.Text = "";
-                    txtUserID.Tag = txtUserID.Text;
-                    txtPassword.Text = "";
 
                 }
                 else
                 {
-                    doLogin(userIdentity);
+                    doSmartPunch(userIdentity);
+
                 }
+
+                // reset the form
+                logOut();
 
             }
             catch (Exception ex)
@@ -339,81 +358,88 @@ namespace TimePunch
 
         }
 
-        private void doLogin(string userIdentity)
+        private void doSmartPunch(string userIdentity)
         {
             txtUserID.Tag = userIdentity;
 
-
             //determine which kind of punch this is
             string signinType = "";
-            if (rdLab.Checked)
-            {
-                signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
-            }
-            else
-            {
-                signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
-            }
 
-            // Get the last punch
-            string sql = "select * from TimePunchEvents where userIdentity = '" + userIdentity + "' and signinType = '" + signinType + "' and manualPunch = 0  order by createUnixTimeStamp desc";
+            // See if there are any clocked in records, so we can clock them out.
+            // logic here is if sign out and in time are equal, they have not yet clocked out
+            string sql = "select * from TimePunchEvents where signinUnixTime = signoutUnixTime and userIdentity = '" + userIdentity + "' and manualPunch = 0  order by createUnixTimeStamp desc";
 
             SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
             SQLiteDataReader reader2 = command2.ExecuteReader();
-            StringBuilder output = new StringBuilder();
+            //StringBuilder output = new StringBuilder();
+            List<string> signOuts = new List<string>();
 
-            bool foundPunch = false;
-            string signInTime = "";
-            string signOutTime = "";
-
-            while (reader2.Read() && !foundPunch)
+            while (reader2.Read())
             {
-                signInTime = reader2["signinUnixTime"].ToString();
-                signOutTime = reader2["signoutUnixTime"].ToString();
-                foundPunch = true;
+                signinType = reader2["signinType"].ToString();
+                // clock them out
+                normalPunchOUT(userIdentity, signinType);
+                //TODO - keep track of this
+                signOuts.Add(signinType);
             }
             reader2.Close();
+            signinType = "";
 
-            // logic here is if sign out and in time are equal, they have not yet signed out
-            if (foundPunch && signOutTime == signInTime)
+            if(signOuts.Count == 0)
             {
-                // Do Sign Out
-                // if punched in, show punch out, show punch in time, show punch out time
-                btnPunchIn.Enabled = false;
-                btnPunchOut.Enabled = !btnPunchIn.Enabled;
-                lblPunchIn.Visible = true;
-                lblPunchOut.Visible = true;
-                lblLastFullPunch.Visible = false;
-                timer.Enabled = true;
-
-                // get last punch in time
-
-                // convert signInTime to a human readable date time
-                lblPunchIn.Text = "Last in for " + signinType + ": " + convertUnixDateTimeToDisplayDateTime(signInTime.ToString());
-
-            }
-            else
-            {
-                // Do Sign In
-                // if punched out, show punch in, show punch in time label, hide punch out label, show last punched in label
-                btnPunchIn.Enabled = true;
-                btnPunchOut.Enabled = !btnPunchIn.Enabled;
-                lblPunchIn.Visible = true;
-                lblPunchOut.Visible = false;
-                timer.Enabled = true;
-
-                lblLastFullPunch.Visible = true;
-                // populate last full punch label with something
-                if (signInTime == "")
+                // if there have been no clock outs done to this point, then clock them in
+                // Get all of the clockin types
+                List<string> signInTypes = new List<string>();
+                for (int i = 0; i < ConfigurationManager.AppSettings.Keys.Count; i++)
                 {
-                    // user has never signed in, so just blank this out
-                    lblLastFullPunch.Text = "";
+                    string keyName = ConfigurationManager.AppSettings.Keys[i].ToString();
+                    if (keyName.Contains("SignInType_"))
+                    {
+                        string sss = ConfigurationManager.AppSettings[keyName].ToString();
+                        signInTypes.Add(sss);
+                    }
+                }
+
+                // if there are more then one then we need them to choose
+                if(signInTypes.Count > 1)
+                {
+                    //TODO - i should pass the db info so it doesnt have to be in the form directly
+                    var signInPicker = new frmSignInTypePicker();
+                    signInPicker.signInTypes = signInTypes;
+                    signInPicker.userIdentity = userIdentity;
+
+                    signInPicker.ShowDialog(this);
+
+                    // grab the sign in type from the form
+                    signinType = signInPicker.selectedSignInType;
+
+                    if(signinType == "")
+                    {
+                        //notify the user they canceled from picker
+                        txtResults.Text = userIdentity + " cancelled login." + Environment.NewLine + txtResults.Text;
+                    }
                 }
                 else
                 {
-                    lblLastFullPunch.Text = "Last " + signinType + " - In: " + convertUnixDateTimeToDisplayDateTime(signInTime) + " - Out: " + convertUnixDateTimeToDisplayDateTime(signOutTime);
+                    signinType = signInTypes[0];
                 }
 
+                // finally, punch them in if we have a signin type
+                if(signinType != "")
+                {
+                    normalPunchIN(userIdentity, signinType);
+                    // notify user the sign in happened
+                    txtResults.Text = userIdentity + " clocked in for " + signinType +"." + Environment.NewLine + txtResults.Text;
+
+                }
+            }
+            else
+            {
+                // notify the user that the signout(s) happened
+                foreach(string signout in signOuts)
+                {
+                    txtResults.Text = userIdentity + " clocked out for " + signout + "." + Environment.NewLine + txtResults.Text;
+                }
             }
 
         }
@@ -426,8 +452,6 @@ namespace TimePunch
             txtUserID.Tag = txtUserID.Text;
             txtPassword.Text = "";
             defaultUIElements();
-            //btnLogin.Visible = true;
-            //btnLogOut.Visible = false;
         }
 
         private void defaultUIElements()
@@ -435,147 +459,26 @@ namespace TimePunch
             log.Debug("IN");
 
             mnuAdmin.Visible = false;
-            timer.Enabled = false;
-            lblPunchIn.Visible = false;
-            lblPunchOut.Visible = false;
-            lblLastFullPunch.Visible = false;
-            btnPunchIn.Enabled = false;
-            btnPunchOut.Enabled = false;
-            lblPunchIn.Text = "";
-            lblPunchOut.Text = "";
-            lblLastFullPunch.Text = "";
-            rdLab.Checked = true;
-            rdTheory.Checked = false;
+            //timer.Enabled = false;
+            //lblPunchIn.Visible = false;
+            //lblPunchOut.Visible = false;
+            //lblLastFullPunch.Visible = false;
+            //btnPunchIn.Enabled = false;
+            //btnPunchOut.Enabled = false;
+            //lblPunchIn.Text = "";
+            //lblPunchOut.Text = "";
+            //lblLastFullPunch.Text = "";
+            //rdLab.Checked = true;
+            //rdTheory.Checked = false;
             btnLogin.Visible = true;
             btnLogOut.Visible = false;
             //grpType.Enabled = btnLogin.Visible;
-            rdLab.Enabled = btnLogin.Visible;
-            rdTheory.Enabled = btnLogin.Visible;
+            //rdLab.Enabled = btnLogin.Visible;
+            //rdTheory.Enabled = btnLogin.Visible;
             skipPassword = false;
         }
 
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            try
-            {
-                // tick the lables
 
-                // get the current date and time stamp
-                string nowTime = DateTime.Now.ToLongTimeString();
-
-                //update the labels
-                if (!(lblPunchIn.Text.IndexOf("Last") >= 0))
-                {
-                    lblPunchIn.Text = nowTime;
-                }
-                lblPunchOut.Text = nowTime;
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error", ex);
-                //MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
-            }
-
-        }
-
-        private void btnPunchOut_Click(object sender, EventArgs e)
-        {
-            log.Debug("IN");
-
-            try
-            {
-                //string userIdentity = txtUserID.Text;
-                string userIdentity = txtUserID.Tag.ToString();
-                string signinType = "";
-                if (rdLab.Checked)
-                {
-                    signinType = ConfigurationManager.AppSettings["SignInType_Lab"].ToString();
-                }
-                else
-                {
-                    signinType = ConfigurationManager.AppSettings["SignInType_Theory"].ToString();
-                }
-
-                Int32 punchtime = normalPunchOUT(userIdentity, signinType);
-
-                // show modal that you are punched out
-                //TODO - show more details here, like the full punch info, how long they were in, etc.
-                MessageBox.Show("Clocked Out! - " + convertUnixDateTimeToDisplayDateTime(punchtime.ToString()), "Info");
-
-                logOut();
-                //defaultUIElements();
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error", ex);
-                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
-            }
-
-
-        }
-        Int32 normalPunchOUT(string userIdentity, string signinType)
-        {
-            log.Debug("IN");
-
-            // grab a timestamp
-            Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-
-            // grab the last punch in
-            // Get the last punch
-            string sql = "select * from TimePunchEvents where userIdentity = '" + userIdentity + "' and signinType = '" + signinType + "' and manualPunch = 0 order by createUnixTimeStamp desc";
-
-            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-            SQLiteDataReader reader = command.ExecuteReader();
-            StringBuilder output = new StringBuilder();
-
-            bool found = false;
-            string signInTime = "";
-            string signOutTime = "";
-
-            while (reader.Read() && !found)
-            {
-                signInTime = reader["signinUnixTime"].ToString();
-                signOutTime = reader["signoutUnixTime"].ToString();
-                found = true;
-            }
-            reader.Close();
-
-            // logic here is if sign out and in time are equal, they have not yet signed out
-            if (found && signOutTime == signInTime)
-            {
-                //dont need to do anything here, we have the data we need from above
-            }
-            else
-            {
-                // throw an error here, you shouldnt have the ability to sign out if there is no sign in
-                MessageBox.Show("No valid sign in found", "Info");
-                return 0;
-            }
-
-            // do the punch out
-            string adminIdentity = "";
-            signOutTime = unixTimestamp.ToString();
-            string signOutComputer = System.Environment.MachineName;
-
-            sql = "update TimePunchEvents set" +
-                " adminIdentity = '" + adminIdentity + "', " +
-                " signoutUnixTime = " + signOutTime.ToString() + ", " +
-                " signoutYear = " + convertUnixDateTimeToYear(signOutTime.ToString()) + ", " +
-                " signoutMonth = " + convertUnixDateTimeToMonth(signOutTime.ToString()) + ", " +
-                " signoutDay = " + convertUnixDateTimeToDay(signOutTime.ToString()) + ", " +
-                " signoutComputer = '" + signOutComputer + "', " +
-                " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
-                " where userIdentity = '" + userIdentity + "' " +
-                " and signinUnixTime = " + signInTime +
-                " and signinType = '" + signinType + "'";
-
-            SQLiteCommand command2 = new SQLiteCommand(sql, m_dbConnection);
-            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
-            command2.ExecuteNonQuery();
-
-            return unixTimestamp;
-
-        }
         private string convertUnixDateTimeToDisplayDateTime(string unixDateTime)
         {
             log.Debug("IN");
@@ -646,26 +549,6 @@ namespace TimePunch
                 log.Error("Error", ex);
                 //dont care
                 //MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
-            }
-
-        }
-
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnLogOut_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                logOut();
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error", ex);
-                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
             }
 
         }
@@ -747,11 +630,6 @@ namespace TimePunch
 
         }
 
-        private void lblLoggedInAs_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void btnFingerprintLogin_Click(object sender, EventArgs e)
         {
             log.Debug("IN");
@@ -776,7 +654,6 @@ namespace TimePunch
                     txtUserID.Tag = txtUserID.Text;
                     txtPassword.Text = "";
                     skipPassword = true;
-                    //btnLogin_Click(sender, e);
                     btnLogin.PerformClick();
                     skipPassword = false;
                 }
@@ -815,7 +692,7 @@ namespace TimePunch
                     txtPassword.Text = userPWD;
                     skipPassword = false;
                     btnLogin.PerformClick();
-                    //btnLogin_Click(sender, e);
+                    skipPassword = false;
                 }
             }
             catch (Exception ex)

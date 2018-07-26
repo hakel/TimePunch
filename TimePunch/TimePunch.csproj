@@ -130,6 +130,12 @@
     <Compile Include="frmMain2.Designer.cs">
       <DependentUpon>frmMain2.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmSignInTypePicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSignInTypePicker.Designer.cs">
+      <DependentUpon>frmSignInTypePicker.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmTouchLogin.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -158,6 +164,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain2.resx">
       <DependentUpon>frmMain2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSignInTypePicker.resx">
+      <DependentUpon>frmSignInTypePicker.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmTouchLogin.resx">
       <DependentUpon>frmTouchLogin.cs</DependentUpon>
