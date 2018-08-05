@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TimePunch
 {
-    //TODO - replace all hard coded sql with this class
+    //TODO - replace all hard coded sql with this class, look for table TimePunchEvents
     class Punch
     {
         public string UserIdentity { get => userIdentity; set => userIdentity = value; }

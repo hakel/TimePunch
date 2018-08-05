@@ -310,7 +310,9 @@ namespace TimePunch
                     }
                     else
                     {
-                        // TODO - this is unexpected, probably need to show a message
+                        // this is unexpected, probably need to show a message
+                        log.Error("Error", ex);
+                        MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
                     }
                     return;
                 }
@@ -379,7 +381,7 @@ namespace TimePunch
                 signinType = reader2["signinType"].ToString();
                 // clock them out
                 normalPunchOUT(userIdentity, signinType);
-                //TODO - keep track of this
+                // keep track of this
                 signOuts.Add(signinType);
             }
             reader2.Close();
@@ -403,7 +405,6 @@ namespace TimePunch
                 // if there are more then one then we need them to choose
                 if(signInTypes.Count > 1)
                 {
-                    //TODO - i should pass the db info so it doesnt have to be in the form directly
                     var signInPicker = new frmSignInTypePicker();
                     signInPicker.signInTypes = signInTypes;
                     signInPicker.userIdentity = userIdentity;
@@ -571,7 +572,6 @@ namespace TimePunch
                 { }
                 m_dbConnection = null;
 
-                //TODO - i should pass the db info so it doesnt have to be in the form directly
                 // this is a first time setup, so show the admin screen
                 var newUserForm = new frmUserInfo();
                 newUserForm.isUpdate = false;
@@ -610,9 +610,7 @@ namespace TimePunch
 
                 // this is a first time setup, so show the admin screen
                 var adminForm = new frmAdmin();
-                //TODO - assign db variables so we dont have them duplicated
                 adminForm.AdminUserID = ConfigurationManager.AppSettings["AdminUserID"].ToString();
-
                 adminForm.ShowDialog(this);
 
                 // reset the form
@@ -637,7 +635,6 @@ namespace TimePunch
             try
             {
 
-                //TODO - i should pass the db info so it doesnt have to be in the form directly
                 // this is a first time setup, so show the admin screen
                 var fingerprintForm = new frmFingerPrintLogin();
 
@@ -673,7 +670,6 @@ namespace TimePunch
             try
             {
 
-                //TODO - i should pass the db info so it doesnt have to be in the form directly
                 // this is a first time setup, so show the admin screen
                 var touchForm = new frmTouchLogin();
 

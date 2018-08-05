@@ -22,6 +22,13 @@ using System.Configuration;
 
 //TODO - validate form fields before submitting (which ones?)
 //TODO - do not allow commas to be entered when creating a user
+//TODO - i should pass the db info to each form as i launch it so it doesnt have to be in each form directly
+//TODO - create a smart picker punch type picker based on the time of day (lab is in morning, so auto-select lab if its the morning, etc.).
+//TODO - make classes for all objects, and replace the strings with the class properties in all the sql
+//TODO - create data layer classes to replace all of the inline sql updates and inserts
+//TODO - crete data layer functions to retrieve data for the classes that have been built
+
+
 
 //--------------------------------------------------
 /*
@@ -749,14 +756,15 @@ namespace TimePunch
                 {
                     if (checkInUX == checkOutUX)
                     {
-                        //TODO - there was never a checkout, so return an error or something??
+                        // there was never a checkout, so return an error or something??
                         // maybe we are ok, we can test this
+                        log.Info("Unexpected Condition, there was never a checkout");
                     }
 
                     // add a manual record
 
                     // Manual time punches should be at some arbitrary time for the given amount of time.
-                    
+
                     if (checkOutUX > 0)
                     {
                         // just add a minute to the last punch for our manual punch start time
@@ -815,7 +823,6 @@ namespace TimePunch
                 }
 
                 // update the results
-                //btnShowDateMinutes_Click(sender, e);
                 btnShowDateMinutes.PerformClick();
 
             }
@@ -899,7 +906,6 @@ namespace TimePunch
 
             try
             {
-                //TODO - i should pass the db info so it doesnt have to be in the form directly
                 // this is a first time setup, so show the admin screen
                 var updateUserForm = new frmUserInfo();
                 updateUserForm.isUpdate = true;
@@ -939,25 +945,6 @@ namespace TimePunch
                         if (row.Tag.ToString() == ConfigurationManager.AppSettings["RowModifiedTag"].ToString())
                         {
                             // Grab the changes
-
-                            /*
-                            // add columns to grid
-                            grdUserHours.Columns.Clear();
-                            grdUserHours.Columns.Add("userIdentity", "User");
-                            grdUserHours.Columns.Add("signinUnixTime", "Time In");
-                            grdUserHours.Columns.Add("signoutUnixTime", "Time Out");
-                            grdUserHours.Columns.Add("createUnixTimeStamp", "Unique Key");
-                            grdUserHours.Columns.Add("manualPunch", "Manual");
-                            
-                            grdUserHours.Rows.Add(new object[] {
-                            reader["userIdentity"].ToString(),
-                            convertUnixDateTimeToDisplayDateTime(reader["signinUnixTime"].ToString()),
-                            convertUnixDateTimeToDisplayDateTime(reader["signoutUnixTime"].ToString()),
-                            reader["createUnixTimeStamp"].ToString(),
-                            reader["manualPunch"].ToString()
-                            });
-                             */
-
                             string signOutComputer = System.Environment.MachineName;
                             string adminIdentity = AdminUserID;
                             string userID = "";
@@ -986,9 +973,14 @@ namespace TimePunch
 
                             }
 
-                            // TODO - validate changes
                             DateTime dtTimeIn = DateTime.Parse(timeIn);
                             DateTime dtTimeOut = DateTime.Parse(timeOut);
+
+                            // validate changes
+                            if(dtTimeIn > dtTimeOut)
+                            {
+                                throw new Exception("Time In cannot be greater than Time Out");
+                            }
 
                             Int32 modifiedsignInTime = (Int32)(dtTimeIn.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
                             Int32 modifiedsignOutTime = (Int32)(dtTimeOut.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;

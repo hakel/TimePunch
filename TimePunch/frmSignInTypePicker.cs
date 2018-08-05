@@ -13,7 +13,6 @@ namespace TimePunch
 
     public partial class frmSignInTypePicker : Form
     {
-        //TODO - create a smart picker here based on the time of day.
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
  

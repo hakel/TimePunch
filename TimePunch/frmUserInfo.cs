@@ -56,13 +56,12 @@ namespace TimePunch
                 connectToDatabase();
 
                 //  validate the data
-                // TODO - rename these more generic since we could be just updating the user
-                string newUserID = txtUserID.Text;
-                string newUserPassword = txtPassword.Text;
-                string newUserPassword2 = txtPassword2.Text;
-                string userGrade = txtGrade.Text;
+                string thisUserID = txtUserID.Text;
+                string thisUserPassword = txtPassword.Text;
+                string thisUserPassword2 = txtPassword2.Text;
+                string thisUserGrade = txtGrade.Text;
 
-                if (newUserPassword != newUserPassword2)
+                if (thisUserPassword != thisUserPassword2)
                 {
                     MessageBox.Show("Passwords do not match.  User not created", "Info");
                     return;
@@ -71,7 +70,7 @@ namespace TimePunch
                 // check that the user doesnt already exist
                 Boolean foundLogin = false;
 
-                string sqlLogin = "select * from TimePunchUserIdentities where userIdentity = '" + newUserID + "' order by createUnixTimeStamp desc";
+                string sqlLogin = "select * from TimePunchUserIdentities where userIdentity = '" + thisUserID + "' order by createUnixTimeStamp desc";
 
                 SQLiteCommand command1 = new SQLiteCommand(sqlLogin, m_dbConnection);
                 SQLiteDataReader reader1 = command1.ExecuteReader();
@@ -93,18 +92,18 @@ namespace TimePunch
                 {
 
                     string sql = "update TimePunchUserIdentities set" +
-                        " userPassword = '" + newUserPassword + "', " +
+                        " userPassword = '" + thisUserPassword + "', " +
                         " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
-                        " where userIdentity = '" + newUserID + "' ";
+                        " where userIdentity = '" + thisUserID + "' ";
 
                     // update password
                     if (fingerprint != "")
                     {
                         sql = "update TimePunchUserIdentities set" +
-                            " userPassword = '" + newUserPassword + "', " +
+                            " userPassword = '" + thisUserPassword + "', " +
                             " userFingerprint = '" + fingerprint + "', " +
                             " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
-                            " where userIdentity = '" + newUserID + "' ";
+                            " where userIdentity = '" + thisUserID + "' ";
                         
                     }
                     SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
@@ -118,9 +117,9 @@ namespace TimePunch
                         " set " +
                         " userFirstName = '" + firstName + "'  , " +
                         " userLastName = '" + lastName + "' , " +
-                        " userGrade = " + userGrade + " , " +
+                        " userGrade = " + thisUserGrade + " , " +
                         " updateUnixTimeStamp = " + unixTimestamp.ToString() + " " +
-                        " Where userIdentity = '" + newUserID + "' ";
+                        " Where userIdentity = '" + thisUserID + "' ";
 
                     SQLiteCommand command3 = new SQLiteCommand(sql, m_dbConnection);
                     log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
@@ -142,8 +141,8 @@ namespace TimePunch
                         " updateUnixTimeStamp" +
                         " ) values " +
                         " (" +
-                        " '" + newUserID + "', " +
-                        " '" + newUserPassword + "', " +
+                        " '" + thisUserID + "', " +
+                        " '" + thisUserPassword + "', " +
                         " '" + fingerprint + "', " +
                          "0, " +
                         unixTimestamp.ToString() + ", " +
@@ -167,10 +166,10 @@ namespace TimePunch
                         " updateUnixTimeStamp" +
                         " ) values " +
                         " (" +
-                        " '" + newUserID + "', " +
+                        " '" + thisUserID + "', " +
                         " '" + firstName + "', " +
                         " '" + lastName + "', " +
-                        " '" + userGrade + "', " +
+                        " '" + thisUserGrade + "', " +
                         unixTimestamp.ToString() + ", " +
                         unixTimestamp.ToString() +
                         " ) ";
@@ -185,7 +184,7 @@ namespace TimePunch
                 // reset the fingerprint
                 fingerprint = "";
                 // Close the form and pass back the user id and prefill it if possible
-                userIDForForm = newUserID;
+                userIDForForm = thisUserID;
                 this.Close();
             }
             catch (Exception ex)
@@ -252,7 +251,8 @@ namespace TimePunch
 
                     if (!foundLogin)
                     {
-                        //TODO - we should do something here if the user we are trying to edit does not exist
+                        //do something here if the user we are trying to edit does not exist
+                        throw new Exception("User Not Found");
                     }
                     else
                     {
@@ -266,7 +266,8 @@ namespace TimePunch
                         {
                             txtPassword.Text = reader2["userPassword"].ToString();
                             txtPassword2.Text = txtPassword.Text;
-                            //TODO - should we add the isAdmin flag at some point
+                            //TODOlater - should we add the isAdmin flag at some point.  
+                            // Meaning, at this point, this form doest support adding an admin or making someone an admin
                         }
                         reader2.Close();
 

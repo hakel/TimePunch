@@ -124,12 +124,6 @@
     <Compile Include="frmFingerPrintLogin.Designer.cs">
       <DependentUpon>frmFingerPrintLogin.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmMain2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmMain2.Designer.cs">
-      <DependentUpon>frmMain2.cs</DependentUpon>
-    </Compile>
     <Compile Include="frmSignInTypePicker.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -161,9 +155,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmFingerPrintLogin.resx">
       <DependentUpon>frmFingerPrintLogin.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmMain2.resx">
-      <DependentUpon>frmMain2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmSignInTypePicker.resx">
       <DependentUpon>frmSignInTypePicker.cs</DependentUpon>
