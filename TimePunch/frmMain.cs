@@ -398,6 +398,8 @@ namespace TimePunch
                     if (keyName.Contains("SignInType_"))
                     {
                         string sss = ConfigurationManager.AppSettings[keyName].ToString();
+                        // parse out the name from the time, we only need the name
+                        //string[] vals = sss.Split(new string[] { "," }, StringSplitOptions.None);
                         signInTypes.Add(sss);
                     }
                 }

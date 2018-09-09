@@ -1295,9 +1295,25 @@ namespace TimePunch
         {
             log.Debug("IN");
 
+            DateTime clockouttime = DateTime.UtcNow;
+
             try
             {
-                Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+
+                var datepickerForm = new frmDateTimePicker();
+                datepickerForm.chosenDate = clockouttime;
+
+                datepickerForm.ShowDialog(this);
+
+                if(datepickerForm.Cancelled)
+                {
+                    MessageBox.Show("Clock out all Cancelled!!", "Info");
+                    return;
+                }
+
+                clockouttime = datepickerForm.chosenDate;
+
+                Int32 unixTimestamp = (Int32)(clockouttime.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
                 string signOutComputer = System.Environment.MachineName;
 
                 string sql3 = "update TimePunchEvents set" + 
@@ -1313,7 +1329,7 @@ namespace TimePunch
                 log.Info("SQL: " + sql3.Replace(Environment.NewLine, " "));
                 command3.ExecuteNonQuery();
 
-                MessageBox.Show("All Users signed out for selected date using the current date and time.", "Info");
+                MessageBox.Show("All Users signed out for " + convertUnixDateTimeToDisplayDateTime(unixTimestamp.ToString()), "Info");
 
                 // update the grid since we made updates
                 updateClockOutGrid();
