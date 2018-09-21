@@ -14,6 +14,12 @@ using System.Configuration;
 //https://social.msdn.microsoft.com/Forums/windows/en-US/7f9462c2-5c03-49e3-aa96-f3d09cbe9fa2/clickonce-certificate-creation-error?forum=winformssetup
 //https://docs.microsoft.com/en-us/visualstudio/deployment/how-to-publish-a-clickonce-application-using-the-publish-wizard
 
+//TODO - bi-weekly report - need to know which week starts a biweekly period
+//TODO - Some kind of nice looking bi-weekly report with a header, signature line, etc.
+//TODO - signoutWeek in events table
+//TODO - signinWeek in events table
+//TODO - dbVersion = 2 (from 1)
+
 //TODO - send database
 //TODO - send logs -- SmtpAppender 
 //TODO - combo box type ahead - built in AutoComplete*
@@ -112,9 +118,11 @@ namespace TimePunch
                 " signinYear int, " +
                 " signinMonth int, " +
                 " signinDay int, " +
+                //" signinWeek int, " +
                 " signoutYear int, " +
                 " signoutMonth int, " +
                 " signoutDay int, " +
+                //" signoutWeek int, " +
                 " signinType varchar(20), " +
                 " signinComputer varchar(20), " +
                 " signoutComputer varchar(20), " +
@@ -1094,7 +1102,7 @@ namespace TimePunch
             sqlDailyTotals.Append(", e.signinType");
             sqlDailyTotals.Append(Environment.NewLine);
 
-            //daily totals per person in minutes, monthly totals per person in hours - by type, by grade
+            //monthly totals per person in hours - by type, by grade
             StringBuilder sqlMonthlyTotals = new StringBuilder();
             sqlMonthlyTotals.Append("select ");
             sqlMonthlyTotals.Append(Environment.NewLine);
@@ -1110,7 +1118,7 @@ namespace TimePunch
             sqlMonthlyTotals.Append(Environment.NewLine);
             sqlMonthlyTotals.Append(", e.signinType");
             sqlMonthlyTotals.Append(Environment.NewLine);
-            sqlMonthlyTotals.Append(", sum(signoutUnixTime - signinUnixTime)/(60*60) as hours ");
+            sqlMonthlyTotals.Append(", round(sum(signoutUnixTime - signinUnixTime)/cast((60*60) as float),2) as hours ");
             sqlMonthlyTotals.Append(Environment.NewLine);
             sqlMonthlyTotals.Append("from ");
             sqlMonthlyTotals.Append(Environment.NewLine);
@@ -1147,13 +1155,77 @@ namespace TimePunch
             sqlMonthlyTotals.Append(", e.signinType");
             sqlMonthlyTotals.Append(Environment.NewLine);
 
-            //daily totals per person in minutes, monthly totals per person in hours - by type, by grade
+            //weekly totals per person in hours - by type, by grade
+            StringBuilder sqlWeeklyTotals = new StringBuilder();
+            sqlWeeklyTotals.Append("select ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("u.userGrade");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", u.userLastName");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", u.userFirstName");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",date(datetime(e.signinUnixTime, 'unixepoch', 'localtime'), 'weekday 0', '-7 days') as weekstartdate ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",date(datetime(e.signinUnixTime, 'unixepoch', 'localtime'), 'weekday 0', '-1 days') as weekenddate ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",strftime('%W', datetime(e.signinUnixTime, 'unixepoch', 'localtime')) as signinWeek ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", e.signinYear");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", e.signinType");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", sum(signoutUnixTime - signinUnixTime)/(60) as minutes  ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", round(sum(signoutUnixTime - signinUnixTime)/cast((60*60) as float),2) as hours  ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("from ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("TimePunchEvents as e ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("inner join ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("TimePunchUserInfo as u on e.userIdentity = u.userIdentity ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("group by ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("u.userGrade");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",e.userIdentity");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", strftime('%W', datetime(e.signinUnixTime, 'unixepoch', 'localtime')) ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", e.signinType ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("order by ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append("u.userGrade");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",e.signinYear");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",strftime('%W', datetime(e.signinUnixTime, 'unixepoch', 'localtime')) ");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(",u.userLastName");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", u.userFirstName");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+            sqlWeeklyTotals.Append(", e.signinType");
+            sqlWeeklyTotals.Append(Environment.NewLine);
+
+
+            //daily totals per person in minutes - by type, by grade
             ListViewItem xx = new ListViewItem();
             xx.Tag = sqlDailyTotals.ToString();
             xx.Text = "Daily Totals";
             cboDataDump.Items.Add(xx);
 
-            //daily totals per person in minutes, monthly totals per person in hours - by type, by grade
+            //weekly totals per person in hours - by type, by grade
+            xx = new ListViewItem();
+            xx.Tag = sqlWeeklyTotals;
+            xx.Text = "Weekly Totals";
+            cboDataDump.Items.Add(xx);
+
+            //monthly totals per person in hours - by type, by grade
             xx = new ListViewItem();
             xx.Tag = sqlMonthlyTotals;
             xx.Text = "Monthly Totals";
@@ -1188,6 +1260,12 @@ namespace TimePunch
             xx = new ListViewItem();
             xx.Tag = "Select * from TimePunchDBVersion";
             xx.Text = "DB Version";
+            cboDataDump.Items.Add(xx);
+
+            //TimePunchDBVersion
+            xx = new ListViewItem();
+            xx.Tag = "Select * from " + summaryTable";
+            xx.Text = "Summary";
             cboDataDump.Items.Add(xx);
 
             if (cboDataDump.Items.Count > 0)

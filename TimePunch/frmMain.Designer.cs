@@ -42,6 +42,7 @@
             this.mnuNewUser = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAdmin = new System.Windows.Forms.ToolStripMenuItem();
             this.txtResults = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.grpLogin.SuspendLayout();
             this.mnuMain.SuspendLayout();
             this.SuspendLayout();
@@ -168,11 +169,22 @@
             this.txtResults.Size = new System.Drawing.Size(227, 106);
             this.txtResults.TabIndex = 46;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(36, 309);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 47;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(243, 314);
+            this.ClientSize = new System.Drawing.Size(243, 341);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.txtResults);
             this.Controls.Add(this.btnFingerprintLogin);
             this.Controls.Add(this.btnTouchLogin);
@@ -210,6 +222,7 @@
         private System.Windows.Forms.Button btnFingerprintLogin;
         private System.Windows.Forms.Button btnTouchLogin;
         private System.Windows.Forms.TextBox txtResults;
+        private System.Windows.Forms.Button button1;
     }
 }
 

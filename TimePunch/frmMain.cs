@@ -55,6 +55,21 @@ namespace TimePunch
                 //Load db version
                 loadDBVersion();
 
+                // set the icon and the form title
+                try
+                {
+                    string formTitle = ConfigurationManager.AppSettings["FormTitle"].ToString();
+                    string formIcon = ConfigurationManager.AppSettings["FormIcon"].ToString();
+                    this.Text = formTitle;
+                    this.Icon = new Icon(formIcon);
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error", ex);
+                    // dont care enough about this error to make it show an error message
+                    //MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+                }
+
             }
             catch (Exception ex)
             {
@@ -700,6 +715,262 @@ namespace TimePunch
             }
 
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string tableName = "ReportWeeklySummary";
+
+            connectToDatabase();
+
+            createSummaryTable();
+
+            //delete all rows from table
+            StringBuilder sql = new StringBuilder();
+            sql.AppendLine(" DELETE ");
+            sql.AppendLine(" FROM " + tableName);
+            SQLiteCommand command1 = new SQLiteCommand(sql.ToString(), m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
+            command1.ExecuteNonQuery();
+
+            // get the types
+            List<string> signInTypes = new List<string>();
+            for (int i = 0; i < ConfigurationManager.AppSettings.Keys.Count; i++)
+            {
+                string keyName = ConfigurationManager.AppSettings.Keys[i].ToString();
+                if (keyName.Contains("SignInType_"))
+                {
+                    string sss = ConfigurationManager.AppSettings[keyName].ToString();
+                    signInTypes.Add(sss);
+                }
+            }
+
+            // get all of the date fields
+            List<string> dateColumns = new List<string>();
+
+            sql.Clear();
+            sql.AppendLine(" SELECT * ");
+            sql.AppendLine(" FROM " + tableName);
+
+            SQLiteCommand command = new SQLiteCommand(sql.ToString(), m_dbConnection);
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            for (int i = 0; i < reader.FieldCount - 1; i++)
+            {
+                string columnName = reader.GetName(i);
+                int n;
+                bool isNumeric = int.TryParse(columnName.Substring(1, 1), out n);
+                if (isNumeric)
+                {
+                    // store off the date columns
+                    dateColumns.Add(columnName);
+                }
+
+            }
+            reader.Close();
+
+            // get all of the users
+            List<string> users = new List<string>();
+
+            sql.Clear();
+            sql.AppendLine("SELECT userIdentity ");
+            sql.AppendLine("FROM TimePunchUserIdentities ");
+            sql.AppendLine("WHERE isAdmin = 0 ");
+            SQLiteCommand command2 = new SQLiteCommand(sql.ToString(), m_dbConnection);
+            SQLiteDataReader reader1 = command2.ExecuteReader();
+            while (reader1.Read())
+            {
+                string userID = reader1["userIdentity"].ToString();
+                users.Add(userID);
+            }
+            reader1.Close();
+
+            // insert all the students in the table for each type
+            sql.Clear();
+            sql.AppendLine("SELECT userIdentity ");
+            sql.AppendLine("FROM TimePunchUserIdentities ");
+            sql.AppendLine("WHERE isAdmin = 0 ");
+            foreach (string userID in users)
+            {
+                foreach (string signInType in signInTypes)
+                {
+                    string totalHours = "0.0";
+
+                    StringBuilder sql2 = new StringBuilder();
+                    sql2.AppendLine("insert into " + tableName);
+                    sql2.AppendLine(" (userIdentity,signinType,totalHours) ");
+                    sql2.AppendLine(" VALUES ");
+                    sql2.AppendLine(" ( ");
+                    sql2.AppendLine("  '" + userID + "' ");
+                    sql2.AppendLine(" ,'" + signInType + "' ");
+                    sql2.AppendLine(" ,'" + totalHours + "' ");
+                    sql2.AppendLine(" ) ");
+
+                    SQLiteCommand command9 = new SQLiteCommand(sql2.ToString(), m_dbConnection);
+                    log.Info("SQL: " + sql2.Replace(Environment.NewLine, " "));
+                    command9.ExecuteNonQuery();
+
+                }
+            }
+
+            // grab the column names and parse out the dates from the date columns
+            List<string> sqlQueries = new List<string>();
+
+            foreach (string columnName in dateColumns)
+            {
+
+                // parse out the dates
+                string[] dates = columnName.Replace("w", "").Split(new string[] { "-" }, StringSplitOptions.None);
+                DateTime startdate = DateTime.Parse(dates[0]);
+                DateTime enddate = DateTime.Parse(dates[1]);
+                Int32 unixTimestampStartDate = (Int32)(startdate.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                Int32 unixTimestampEndDate = (Int32)(enddate.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+
+                // Left off here - should we do this all in the insert
+                // or do this in an update?  if update, we are repeating the loop to get users and punch types
+                StringBuilder sss = new StringBuilder();
+                sss.AppendLine("select ");
+                sss.AppendLine("round(sum(signoutUnixTime - signinUnixTime)/cast((60*60) as float),2) hours ");
+                sss.AppendLine("from TimePunchEvents ");
+                sss.AppendLine("where ");
+                sss.AppendLine("userIdentity = '<<userIdentity>>' ");
+                sss.AppendLine("AND signinType = '<<signinType>>' ");
+                sss.AppendLine("and signinUnixTime between ");
+                sss.AppendLine(unixTimestampStartDate.ToString());
+                sss.AppendLine(" and ");
+                sss.AppendLine(unixTimestampEndDate.ToString());
+
+                StringBuilder yyy = new StringBuilder();
+                yyy.AppendLine("update " + tableName);
+                yyy.AppendLine(" set [" + columnName + "] = ");
+                yyy.AppendLine(" ( ");
+                yyy.AppendLine(sss.ToString());
+                yyy.AppendLine(" ) ");
+                yyy.AppendLine("where ");
+                yyy.AppendLine("userIdentity = '<<userIdentity>>' ");
+                yyy.AppendLine("AND signinType = '<<signinType>>' ");
+
+                string zzz = yyy.ToString();
+                sqlQueries.Add(zzz);
+
+            }
+
+            // loop through the users and types again and do all the updates
+            string ygyg = "";
+            foreach (string userID in users)
+            {
+                foreach (string signInType in signInTypes)
+                {
+                    foreach (string sqlQuery in sqlQueries)
+                    {
+                        string executeSQL = sqlQuery.Replace("<<userIdentity>>", userID).Replace("<<signinType>>", signInType);
+                        SQLiteCommand command4 = new SQLiteCommand(executeSQL, m_dbConnection);
+                        command4.ExecuteNonQuery();
+                    }
+                }
+            }
+
+
+            // TODO - update the totals
+            // loop through the users and types again and do all the updates
+            string ygygy = "";
+            foreach (string userID in users)
+            {
+                foreach (string signInType in signInTypes)
+                {
+                    StringBuilder sqlTotal = new StringBuilder();
+                    sqlTotal.AppendLine("update " + tableName);
+                    sqlTotal.AppendLine(" set totalHours = ");
+                    sqlTotal.AppendLine(" ( ");
+                    sqlTotal.AppendLine(" select");
+
+                    int colCount = 0;
+                    foreach (string columnName in dateColumns)
+                    {
+                        sqlTotal.AppendLine("ifnull([" + columnName + "],0.0)");
+                        colCount += 1;
+                        if(colCount != dateColumns.Count)
+                        {
+                            sqlTotal.AppendLine(" + ");
+                        }
+                    }
+
+                    sqlTotal.AppendLine(" from " + tableName);
+                    sqlTotal.AppendLine(" where ");
+                    sqlTotal.AppendLine(" userIdentity = '<<userIdentity>>' ");
+                    sqlTotal.AppendLine(" AND signinType = '<<signinType>>' ");
+                    sqlTotal.AppendLine(" ) ");
+                    sqlTotal.AppendLine(" where ");
+                    sqlTotal.AppendLine(" userIdentity = '<<userIdentity>>' ");
+                    sqlTotal.AppendLine(" AND signinType = '<<signinType>>' ");
+
+                    string executeSQL = sqlTotal.ToString().Replace("<<userIdentity>>", userID).Replace("<<signinType>>", signInType);
+                    SQLiteCommand command8 = new SQLiteCommand(executeSQL, m_dbConnection);
+                    command8.ExecuteNonQuery();
+                }
+            }
+        }
+        void createSummaryTable()
+        {
+            log.Debug("IN");
+            
+            //TODO - get these from the config
+            int startWeekNumber = 30;
+            int endWeekNumber = 20;
+            int startYear = 2017;
+            int endYear = 2018;
+            string tableName = "ReportWeeklySummary";
+            int dayChunksForColumns = 7;
+
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.Append("drop table " + tableName);
+            SQLiteCommand command0 = new SQLiteCommand(sql.ToString(), m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
+            command0.ExecuteNonQuery();
+
+
+            sql.Clear();
+            
+            sql.AppendLine("create table " + tableName);
+            sql.AppendLine(" (");
+            sql.AppendLine(" userIdentity varchar(20), ");
+            sql.AppendLine(" signinType varchar(20), ");
+
+            string dayOneStart = "1/1/" + startYear.ToString();
+            DateTime startDate = DateTime.Parse(dayOneStart);
+            startDate = startDate.AddDays(startWeekNumber * 7);
+            var dateStart = startDate.AddDays(-(int)startDate.DayOfWeek);
+
+            string dayOneEnd = "1/1/" + endYear.ToString();
+            DateTime endDate = DateTime.Parse(dayOneEnd);
+            endDate = endDate.AddDays(endWeekNumber * 7);
+            var dateEnd = endDate.AddDays(-(int)endDate.DayOfWeek);
+
+            DateTime loopDate = startDate;
+            while (loopDate < endDate)
+            {
+                string part1 = loopDate.ToString("MM/dd/yy");
+                string part2 = loopDate.AddDays(dayChunksForColumns).AddMinutes(-1).ToString("MM/dd/yy");
+                string together = "[w" + part1 + "-" + part2 + "]";
+                sql.AppendLine(together + " varchar(20), ");
+
+                // increment the date
+                loopDate = loopDate.AddDays(7);
+            }
+
+            sql.AppendLine("totalHours varchar(20) ");
+
+            sql.AppendLine(" )");
+
+            SQLiteCommand command = new SQLiteCommand(sql.ToString(), m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
+            command.ExecuteNonQuery();
+
+            log.Info("Table Created: " + tableName);
+
+        }
+
     }
 
 }
