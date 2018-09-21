@@ -1262,9 +1262,9 @@ namespace TimePunch
             xx.Text = "DB Version";
             cboDataDump.Items.Add(xx);
 
-            //TimePunchDBVersion
+            //Summary table
             xx = new ListViewItem();
-            xx.Tag = "Select * from " + summaryTable";
+            //xx.Tag = "Select * from " + summaryTable;
             xx.Text = "Summary";
             cboDataDump.Items.Add(xx);
 

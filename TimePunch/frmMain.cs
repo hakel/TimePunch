@@ -719,18 +719,11 @@ namespace TimePunch
         private void button1_Click(object sender, EventArgs e)
         {
             string tableName = "ReportWeeklySummary";
+            StringBuilder sql = new StringBuilder();
 
             connectToDatabase();
 
             createSummaryTable();
-
-            //delete all rows from table
-            StringBuilder sql = new StringBuilder();
-            sql.AppendLine(" DELETE ");
-            sql.AppendLine(" FROM " + tableName);
-            SQLiteCommand command1 = new SQLiteCommand(sql.ToString(), m_dbConnection);
-            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
-            command1.ExecuteNonQuery();
 
             // get the types
             List<string> signInTypes = new List<string>();
@@ -784,11 +777,61 @@ namespace TimePunch
             }
             reader1.Close();
 
-            // insert all the students in the table for each type
+
+            // grab the column names and parse out the dates from the date columns
+            // and create the update statements
+            List<string> sqlUpdateQueries = new List<string>();
+
+            foreach (string columnName in dateColumns)
+            {
+
+                // parse out the dates
+                string[] dates = columnName.Replace("w", "").Split(new string[] { "-" }, StringSplitOptions.None);
+                DateTime startdate = DateTime.Parse(dates[0]);
+                DateTime enddate = DateTime.Parse(dates[1]);
+                Int32 unixTimestampStartDate = (Int32)(startdate.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                Int32 unixTimestampEndDate = (Int32)(enddate.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+
+                // Left off here - should we do this all in the insert
+                // or do this in an update?  if update, we are repeating the loop to get users and punch types
+                StringBuilder sqlSelectQueryForUpdate = new StringBuilder();
+                sqlSelectQueryForUpdate.AppendLine("select ");
+                sqlSelectQueryForUpdate.AppendLine("round(sum(signoutUnixTime - signinUnixTime)/cast((60*60) as float),2) hours ");
+                sqlSelectQueryForUpdate.AppendLine("from TimePunchEvents ");
+                sqlSelectQueryForUpdate.AppendLine("where ");
+                sqlSelectQueryForUpdate.AppendLine("userIdentity = '<<userIdentity>>' ");
+                sqlSelectQueryForUpdate.AppendLine("AND signinType = '<<signinType>>' ");
+                sqlSelectQueryForUpdate.AppendLine("and signinUnixTime between ");
+                sqlSelectQueryForUpdate.AppendLine(unixTimestampStartDate.ToString());
+                sqlSelectQueryForUpdate.AppendLine(" and ");
+                sqlSelectQueryForUpdate.AppendLine(unixTimestampEndDate.ToString());
+
+                StringBuilder sqlUpdateQueryForUpdate = new StringBuilder();
+                sqlUpdateQueryForUpdate.AppendLine("update " + tableName);
+                sqlUpdateQueryForUpdate.AppendLine(" set [" + columnName + "] = ");
+                sqlUpdateQueryForUpdate.AppendLine(" ( ");
+                sqlUpdateQueryForUpdate.AppendLine(sqlSelectQueryForUpdate.ToString());
+                sqlUpdateQueryForUpdate.AppendLine(" ) ");
+                sqlUpdateQueryForUpdate.AppendLine("where ");
+                sqlUpdateQueryForUpdate.AppendLine("userIdentity = '<<userIdentity>>' ");
+                sqlUpdateQueryForUpdate.AppendLine("AND signinType = '<<signinType>>' ");
+
+                sqlUpdateQueries.Add(sqlUpdateQueryForUpdate.ToString());
+
+            }
+
+            DateTime sqlrunStartTime = new DateTime();
+            sqlrunStartTime = DateTime.Now;
+
+            //delete all rows from table
             sql.Clear();
-            sql.AppendLine("SELECT userIdentity ");
-            sql.AppendLine("FROM TimePunchUserIdentities ");
-            sql.AppendLine("WHERE isAdmin = 0 ");
+            sql.AppendLine(" DELETE ");
+            sql.AppendLine(" FROM " + tableName);
+            SQLiteCommand command1 = new SQLiteCommand(sql.ToString(), m_dbConnection);
+            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
+            command1.ExecuteNonQuery();
+
+            // insert all the students in the table for each type
             foreach (string userID in users)
             {
                 foreach (string signInType in signInTypes)
@@ -812,55 +855,12 @@ namespace TimePunch
                 }
             }
 
-            // grab the column names and parse out the dates from the date columns
-            List<string> sqlQueries = new List<string>();
-
-            foreach (string columnName in dateColumns)
-            {
-
-                // parse out the dates
-                string[] dates = columnName.Replace("w", "").Split(new string[] { "-" }, StringSplitOptions.None);
-                DateTime startdate = DateTime.Parse(dates[0]);
-                DateTime enddate = DateTime.Parse(dates[1]);
-                Int32 unixTimestampStartDate = (Int32)(startdate.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                Int32 unixTimestampEndDate = (Int32)(enddate.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-
-                // Left off here - should we do this all in the insert
-                // or do this in an update?  if update, we are repeating the loop to get users and punch types
-                StringBuilder sss = new StringBuilder();
-                sss.AppendLine("select ");
-                sss.AppendLine("round(sum(signoutUnixTime - signinUnixTime)/cast((60*60) as float),2) hours ");
-                sss.AppendLine("from TimePunchEvents ");
-                sss.AppendLine("where ");
-                sss.AppendLine("userIdentity = '<<userIdentity>>' ");
-                sss.AppendLine("AND signinType = '<<signinType>>' ");
-                sss.AppendLine("and signinUnixTime between ");
-                sss.AppendLine(unixTimestampStartDate.ToString());
-                sss.AppendLine(" and ");
-                sss.AppendLine(unixTimestampEndDate.ToString());
-
-                StringBuilder yyy = new StringBuilder();
-                yyy.AppendLine("update " + tableName);
-                yyy.AppendLine(" set [" + columnName + "] = ");
-                yyy.AppendLine(" ( ");
-                yyy.AppendLine(sss.ToString());
-                yyy.AppendLine(" ) ");
-                yyy.AppendLine("where ");
-                yyy.AppendLine("userIdentity = '<<userIdentity>>' ");
-                yyy.AppendLine("AND signinType = '<<signinType>>' ");
-
-                string zzz = yyy.ToString();
-                sqlQueries.Add(zzz);
-
-            }
-
             // loop through the users and types again and do all the updates
-            string ygyg = "";
             foreach (string userID in users)
             {
                 foreach (string signInType in signInTypes)
                 {
-                    foreach (string sqlQuery in sqlQueries)
+                    foreach (string sqlQuery in sqlUpdateQueries)
                     {
                         string executeSQL = sqlQuery.Replace("<<userIdentity>>", userID).Replace("<<signinType>>", signInType);
                         SQLiteCommand command4 = new SQLiteCommand(executeSQL, m_dbConnection);
@@ -870,9 +870,8 @@ namespace TimePunch
             }
 
 
-            // TODO - update the totals
+            // update the totals
             // loop through the users and types again and do all the updates
-            string ygygy = "";
             foreach (string userID in users)
             {
                 foreach (string signInType in signInTypes)
@@ -908,6 +907,13 @@ namespace TimePunch
                     command8.ExecuteNonQuery();
                 }
             }
+
+            DateTime sqlrunEndTime = new DateTime();
+            sqlrunEndTime = DateTime.Now;
+
+            //222 SECONDS
+            txtResults.Text = sqlrunEndTime.Subtract(sqlrunStartTime).TotalSeconds.ToString();
+
         }
         void createSummaryTable()
         {
