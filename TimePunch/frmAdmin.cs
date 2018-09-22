@@ -285,6 +285,7 @@ namespace TimePunch
 
             try
             {
+                Cursor.Current = Cursors.WaitCursor;
 
                 ListViewItem xx = (ListViewItem)cboDataDump.SelectedItem;
                 string sql = xx.Tag.ToString();
@@ -429,9 +430,12 @@ namespace TimePunch
             }
             catch (Exception ex)
             {
+                Cursor.Current = Cursors.Default;
                 log.Error("Error", ex);
                 MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
             }
+
+            Cursor.Current = Cursors.Default;
 
         }
 
@@ -1050,6 +1054,7 @@ namespace TimePunch
         private void setupQueries()
         {
             log.Debug("IN");
+
             cboDataDump.Items.Clear();
 
             //daily totals per person in minutes, by type, by grade
@@ -1274,7 +1279,7 @@ namespace TimePunch
             //Summary table
             string summaryTable = ConfigurationManager.AppSettings["SummaryReport_tableName"].ToString();
             xx = new ListViewItem();
-            xx.Tag = "Select * from " + summaryTable;
+            xx.Tag = "Select u.userFirstName || ' ' || u.userLastName as Student, s.* from " + summaryTable + " as s inner join TimePunchUserInfo as u on s.userIdentity = u.userIdentity";
             xx.Text = "Summary";
             cboDataDump.Items.Add(xx);
 
