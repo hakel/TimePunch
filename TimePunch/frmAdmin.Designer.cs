@@ -46,8 +46,6 @@
             this.grdUserHours = new System.Windows.Forms.DataGridView();
             this.btnUpdateHours = new System.Windows.Forms.Button();
             this.cboUsers = new System.Windows.Forms.ComboBox();
-            this.rdLab = new System.Windows.Forms.RadioButton();
-            this.rdTheory = new System.Windows.Forms.RadioButton();
             this.btnShowDateMinutes = new System.Windows.Forms.Button();
             this.btnAddMinutes = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
@@ -208,8 +206,6 @@
             // 
             this.tabPage2.Controls.Add(this.tbShowDay);
             this.tabPage2.Controls.Add(this.cboUsers);
-            this.tabPage2.Controls.Add(this.rdLab);
-            this.tabPage2.Controls.Add(this.rdTheory);
             this.tabPage2.Controls.Add(this.btnShowDateMinutes);
             this.tabPage2.Controls.Add(this.btnAddMinutes);
             this.tabPage2.Controls.Add(this.label8);
@@ -297,28 +293,6 @@
             this.cboUsers.Size = new System.Drawing.Size(178, 21);
             this.cboUsers.TabIndex = 44;
             // 
-            // rdLab
-            // 
-            this.rdLab.AutoSize = true;
-            this.rdLab.Checked = true;
-            this.rdLab.Location = new System.Drawing.Point(204, 10);
-            this.rdLab.Name = "rdLab";
-            this.rdLab.Size = new System.Drawing.Size(43, 17);
-            this.rdLab.TabIndex = 42;
-            this.rdLab.TabStop = true;
-            this.rdLab.Text = "Lab";
-            this.rdLab.UseVisualStyleBackColor = true;
-            // 
-            // rdTheory
-            // 
-            this.rdTheory.AutoSize = true;
-            this.rdTheory.Location = new System.Drawing.Point(204, 37);
-            this.rdTheory.Name = "rdTheory";
-            this.rdTheory.Size = new System.Drawing.Size(58, 17);
-            this.rdTheory.TabIndex = 43;
-            this.rdTheory.Text = "Theory";
-            this.rdTheory.UseVisualStyleBackColor = true;
-            // 
             // btnShowDateMinutes
             // 
             this.btnShowDateMinutes.Location = new System.Drawing.Point(6, 91);
@@ -331,7 +305,7 @@
             // 
             // btnAddMinutes
             // 
-            this.btnAddMinutes.Location = new System.Drawing.Point(400, 52);
+            this.btnAddMinutes.Location = new System.Drawing.Point(375, 25);
             this.btnAddMinutes.Name = "btnAddMinutes";
             this.btnAddMinutes.Size = new System.Drawing.Size(75, 23);
             this.btnAddMinutes.TabIndex = 39;
@@ -342,7 +316,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(397, 10);
+            this.label8.Location = new System.Drawing.Point(253, 10);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(78, 13);
             this.label8.TabIndex = 37;
@@ -350,7 +324,7 @@
             // 
             // txtMinutesToAdd
             // 
-            this.txtMinutesToAdd.Location = new System.Drawing.Point(400, 26);
+            this.txtMinutesToAdd.Location = new System.Drawing.Point(256, 26);
             this.txtMinutesToAdd.Name = "txtMinutesToAdd";
             this.txtMinutesToAdd.Size = new System.Drawing.Size(100, 20);
             this.txtMinutesToAdd.TabIndex = 36;
@@ -700,8 +674,6 @@
         private System.Windows.Forms.Button btnShowDateMinutes;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.ComboBox cboDataDump;
-        private System.Windows.Forms.RadioButton rdLab;
-        private System.Windows.Forms.RadioButton rdTheory;
         private System.Windows.Forms.ComboBox cboUsers;
         private System.Windows.Forms.TextBox txtDayResults;
         private System.Windows.Forms.ComboBox cboUsersForPassword;
