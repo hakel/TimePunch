@@ -33,6 +33,11 @@
             this.btnOneTimeSetup = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.tabAdmin = new System.Windows.Forms.TabControl();
+            this.tabPage9 = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
+            this.grdClockOut = new System.Windows.Forms.DataGridView();
+            this.dtClockOutAll = new System.Windows.Forms.DateTimePicker();
+            this.btnClockOutAll = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tbShowDay = new System.Windows.Forms.TabControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
@@ -69,12 +74,15 @@
             this.btnDBBackup = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtDBBackup = new System.Windows.Forms.TextBox();
-            this.tabPage9 = new System.Windows.Forms.TabPage();
-            this.btnClockOutAll = new System.Windows.Forms.Button();
-            this.dtClockOutAll = new System.Windows.Forms.DateTimePicker();
-            this.grdClockOut = new System.Windows.Forms.DataGridView();
-            this.label3 = new System.Windows.Forms.Label();
+            this.tabPage11 = new System.Windows.Forms.TabPage();
+            this.btnTimesheet = new System.Windows.Forms.Button();
+            this.cboUsersTimesheet = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.dtTimesheet = new System.Windows.Forms.DateTimePicker();
+            this.label9 = new System.Windows.Forms.Label();
             this.tabAdmin.SuspendLayout();
+            this.tabPage9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grdClockOut)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.tbShowDay.SuspendLayout();
             this.tabPage5.SuspendLayout();
@@ -88,8 +96,7 @@
             this.tabPage4.SuspendLayout();
             this.tabPage7.SuspendLayout();
             this.tabPage10.SuspendLayout();
-            this.tabPage9.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grdClockOut)).BeginInit();
+            this.tabPage11.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtDataResults
@@ -136,11 +143,66 @@
             this.tabAdmin.Controls.Add(this.tabPage1);
             this.tabAdmin.Controls.Add(this.tabPage3);
             this.tabAdmin.Controls.Add(this.tabPage10);
+            this.tabAdmin.Controls.Add(this.tabPage11);
             this.tabAdmin.Location = new System.Drawing.Point(12, 10);
             this.tabAdmin.Name = "tabAdmin";
             this.tabAdmin.SelectedIndex = 0;
             this.tabAdmin.Size = new System.Drawing.Size(559, 291);
             this.tabAdmin.TabIndex = 31;
+            // 
+            // tabPage9
+            // 
+            this.tabPage9.Controls.Add(this.label3);
+            this.tabPage9.Controls.Add(this.grdClockOut);
+            this.tabPage9.Controls.Add(this.dtClockOutAll);
+            this.tabPage9.Controls.Add(this.btnClockOutAll);
+            this.tabPage9.Location = new System.Drawing.Point(4, 22);
+            this.tabPage9.Name = "tabPage9";
+            this.tabPage9.Size = new System.Drawing.Size(551, 265);
+            this.tabPage9.TabIndex = 5;
+            this.tabPage9.Text = "Clock Out All";
+            this.tabPage9.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 40);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(127, 13);
+            this.label3.TabIndex = 49;
+            this.label3.Text = "Users who are clocked in";
+            // 
+            // grdClockOut
+            // 
+            this.grdClockOut.AllowUserToAddRows = false;
+            this.grdClockOut.AllowUserToDeleteRows = false;
+            this.grdClockOut.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.grdClockOut.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.grdClockOut.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.grdClockOut.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.grdClockOut.Location = new System.Drawing.Point(13, 56);
+            this.grdClockOut.Name = "grdClockOut";
+            this.grdClockOut.RowHeadersWidth = 20;
+            this.grdClockOut.Size = new System.Drawing.Size(522, 167);
+            this.grdClockOut.TabIndex = 48;
+            // 
+            // dtClockOutAll
+            // 
+            this.dtClockOutAll.Location = new System.Drawing.Point(14, 12);
+            this.dtClockOutAll.Name = "dtClockOutAll";
+            this.dtClockOutAll.Size = new System.Drawing.Size(200, 20);
+            this.dtClockOutAll.TabIndex = 42;
+            this.dtClockOutAll.ValueChanged += new System.EventHandler(this.dtClockOutAll_ValueChanged);
+            // 
+            // btnClockOutAll
+            // 
+            this.btnClockOutAll.Location = new System.Drawing.Point(13, 232);
+            this.btnClockOutAll.Name = "btnClockOutAll";
+            this.btnClockOutAll.Size = new System.Drawing.Size(109, 23);
+            this.btnClockOutAll.TabIndex = 41;
+            this.btnClockOutAll.Text = "Clock Out All";
+            this.btnClockOutAll.UseVisualStyleBackColor = true;
+            this.btnClockOutAll.Click += new System.EventHandler(this.btnClockOutAll_Click);
             // 
             // tabPage2
             // 
@@ -518,59 +580,63 @@
             this.txtDBBackup.Size = new System.Drawing.Size(264, 20);
             this.txtDBBackup.TabIndex = 38;
             // 
-            // tabPage9
+            // tabPage11
             // 
-            this.tabPage9.Controls.Add(this.label3);
-            this.tabPage9.Controls.Add(this.grdClockOut);
-            this.tabPage9.Controls.Add(this.dtClockOutAll);
-            this.tabPage9.Controls.Add(this.btnClockOutAll);
-            this.tabPage9.Location = new System.Drawing.Point(4, 22);
-            this.tabPage9.Name = "tabPage9";
-            this.tabPage9.Size = new System.Drawing.Size(551, 265);
-            this.tabPage9.TabIndex = 5;
-            this.tabPage9.Text = "Clock Out All";
-            this.tabPage9.UseVisualStyleBackColor = true;
+            this.tabPage11.Controls.Add(this.btnTimesheet);
+            this.tabPage11.Controls.Add(this.cboUsersTimesheet);
+            this.tabPage11.Controls.Add(this.label4);
+            this.tabPage11.Controls.Add(this.dtTimesheet);
+            this.tabPage11.Controls.Add(this.label9);
+            this.tabPage11.Location = new System.Drawing.Point(4, 22);
+            this.tabPage11.Name = "tabPage11";
+            this.tabPage11.Size = new System.Drawing.Size(551, 265);
+            this.tabPage11.TabIndex = 6;
+            this.tabPage11.Text = "Timesheet";
+            this.tabPage11.UseVisualStyleBackColor = true;
             // 
-            // btnClockOutAll
+            // btnTimesheet
             // 
-            this.btnClockOutAll.Location = new System.Drawing.Point(13, 232);
-            this.btnClockOutAll.Name = "btnClockOutAll";
-            this.btnClockOutAll.Size = new System.Drawing.Size(109, 23);
-            this.btnClockOutAll.TabIndex = 41;
-            this.btnClockOutAll.Text = "Clock Out All";
-            this.btnClockOutAll.UseVisualStyleBackColor = true;
-            this.btnClockOutAll.Click += new System.EventHandler(this.btnClockOutAll_Click);
+            this.btnTimesheet.Location = new System.Drawing.Point(13, 116);
+            this.btnTimesheet.Name = "btnTimesheet";
+            this.btnTimesheet.Size = new System.Drawing.Size(88, 23);
+            this.btnTimesheet.TabIndex = 52;
+            this.btnTimesheet.Text = "Preview";
+            this.btnTimesheet.UseVisualStyleBackColor = true;
+            this.btnTimesheet.Click += new System.EventHandler(this.button1_Click);
             // 
-            // dtClockOutAll
+            // cboUsersTimesheet
             // 
-            this.dtClockOutAll.Location = new System.Drawing.Point(14, 12);
-            this.dtClockOutAll.Name = "dtClockOutAll";
-            this.dtClockOutAll.Size = new System.Drawing.Size(200, 20);
-            this.dtClockOutAll.TabIndex = 42;
-            this.dtClockOutAll.ValueChanged += new System.EventHandler(this.dtClockOutAll_ValueChanged);
+            this.cboUsersTimesheet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboUsersTimesheet.FormattingEnabled = true;
+            this.cboUsersTimesheet.Location = new System.Drawing.Point(13, 31);
+            this.cboUsersTimesheet.Name = "cboUsersTimesheet";
+            this.cboUsersTimesheet.Size = new System.Drawing.Size(178, 21);
+            this.cboUsersTimesheet.TabIndex = 51;
             // 
-            // grdClockOut
+            // label4
             // 
-            this.grdClockOut.AllowUserToAddRows = false;
-            this.grdClockOut.AllowUserToDeleteRows = false;
-            this.grdClockOut.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.grdClockOut.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.grdClockOut.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grdClockOut.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.grdClockOut.Location = new System.Drawing.Point(13, 56);
-            this.grdClockOut.Name = "grdClockOut";
-            this.grdClockOut.RowHeadersWidth = 20;
-            this.grdClockOut.Size = new System.Drawing.Size(522, 167);
-            this.grdClockOut.TabIndex = 48;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(13, 55);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(30, 13);
+            this.label4.TabIndex = 48;
+            this.label4.Text = "Date";
             // 
-            // label3
+            // dtTimesheet
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(11, 40);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(127, 13);
-            this.label3.TabIndex = 49;
-            this.label3.Text = "Users who are clocked in";
+            this.dtTimesheet.Location = new System.Drawing.Point(13, 71);
+            this.dtTimesheet.Name = "dtTimesheet";
+            this.dtTimesheet.Size = new System.Drawing.Size(200, 20);
+            this.dtTimesheet.TabIndex = 47;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(10, 16);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(40, 13);
+            this.label9.TabIndex = 46;
+            this.label9.Text = "UserID";
             // 
             // frmAdmin
             // 
@@ -587,6 +653,9 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmAdmin_FormClosing);
             this.Load += new System.EventHandler(this.frmAdmin_Load);
             this.tabAdmin.ResumeLayout(false);
+            this.tabPage9.ResumeLayout(false);
+            this.tabPage9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.grdClockOut)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.tbShowDay.ResumeLayout(false);
@@ -607,9 +676,8 @@
             this.tabPage7.PerformLayout();
             this.tabPage10.ResumeLayout(false);
             this.tabPage10.PerformLayout();
-            this.tabPage9.ResumeLayout(false);
-            this.tabPage9.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.grdClockOut)).EndInit();
+            this.tabPage11.ResumeLayout(false);
+            this.tabPage11.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -662,5 +730,11 @@
         private System.Windows.Forms.DateTimePicker dtClockOutAll;
         private System.Windows.Forms.DataGridView grdClockOut;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TabPage tabPage11;
+        private System.Windows.Forms.Button btnTimesheet;
+        private System.Windows.Forms.ComboBox cboUsersTimesheet;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.DateTimePicker dtTimesheet;
+        private System.Windows.Forms.Label label9;
     }
 }

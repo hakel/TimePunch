@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html>
+  <head>
+    <meta http-equiv='content-type' content='text/html;
+      charset=windows-1252'>
+    <title>Timesheet</title>
+    <style>
+        html{
+            font-family: Calibri;
+        }
+        table.dailylist{
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th.dailylist {
+            text-align: left;
+        }
+        td.dailylist {
+            text-align: left;
+        }
+        th.summary {
+            text-align: left;
+        }
+        tr.dailylist:nth-child(even) {
+            background-color:aliceblue;
+        }
+        tr.dailylist:nth-child(odd) {
+            background-color:white;
+        }
+        table.master {
+            width: 700px;
+        }
+        table.summary {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.signatures {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td.header{
+            font-size:xx-large;
+            font-weight:bold;
+        }
+        td.major {
+            font-size: large;
+            font-weight: bold;
+        }
+        td.topborderbold {
+            border-top: thin solid;
+            font-weight: bold;
+        }
+        td.topborderboldlarge {
+            border-top: thin solid;
+            font-weight: bold;
+            font-size: large;
+        }
+    </style>
+  </head>
+  <body>
+      <table class='master' border='0'>
+          <tr>
+              <td class='header'>
+                  Early Childhood Education Log
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  Grant Career Center Head Start<br />
+                  718 W. Plane St<br />
+                  Bethel  OH 45106<br />
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td class='major'>
+                  Scott Hakel - Lab
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td class='major'>
+                  Week 1 -> 5/1/2018 - 6/1/2018
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <table class='dailylist'>
+                      <tbody>
+                          <tr class='dailylist'>
+                              <th class='dailylist'>
+                                  &nbsp;
+                              </th>
+                              <th class='dailylist'>Clock In</th>
+                              <th class='dailylist'>Clock Out</th>
+                              <th class='dailylist'>Minutes</th>
+                              <th class='dailylist'>Hours</th>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Monday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Tuesday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Wednesday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Thursday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Friday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='topborderbold'>
+                                  Week 1 Total
+                              </td>
+                              <td class='topborderbold'>
+                                  &nbsp;
+                              </td>
+                              <td class='topborderbold'>
+                                  &nbsp;
+                              </td>
+                              <td  class='topborderbold'>235 </td>
+                              <td  class='topborderbold'>6.75 </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td class='major'>
+                  Week 2 -> 6/1/2018 - 7/1/2018
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <table class='dailylist'>
+                      <tbody>
+                          <tr class='dailylist'>
+                              <th class='dailylist'>
+                                  &nbsp;
+                              </th>
+                              <th class='dailylist'>Clock In</th>
+                              <th class='dailylist'>Clock Out</th>
+                              <th class='dailylist'>Minutes</th>
+                              <th class='dailylist'>Hours</th>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Monday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Tuesday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Wednesday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Thursday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td class='dailylist'>Friday</td>
+                              <td class='dailylist'>8:45 PM </td>
+                              <td class='dailylist'>9:45 PM </td>
+                              <td class='dailylist'>65 </td>
+                              <td class='dailylist'>1.00 </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                              <td>
+                                  &nbsp;
+                              </td>
+                          </tr>
+                          <tr class='dailylist'>
+                              <td  class='topborderbold'>
+                                  Week 2 Total
+                              </td>
+                              <td class='topborderbold'>
+                                  &nbsp;
+                              </td>
+                              <td class='topborderbold'>
+                                  &nbsp;
+                              </td>
+                              <td  class='topborderbold'>235 </td>
+                              <td  class='topborderbold'>6.75 </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td class='major'>
+                  Summary
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <table class='summary'>
+                      <tr>
+                          <th class='summary'>&nbsp;</th>
+                          <th class='summary'>Hours</th>
+                      </tr>
+                      <tr>
+                          <td>Week 1 -> 5/1/2018 - 6/1/2018</td>
+                          <td>6.75</td>
+                      </tr>
+                      <tr>
+                          <td>Week 2 -> 6/1/2018 - 7/1/2018</td>
+                          <td>4.33</td>
+                      </tr>
+                      <tr>
+                          <td class='topborderboldlarge'>Grand Total</td>
+                          <td class='topborderboldlarge'>11.05</td>
+                      </tr>
+                  </table>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  &nbsp;
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <table class='signatures'>
+                      <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                      </tr>
+                      <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                      </tr>
+                      <tr>
+                          <td class='topborderbold'>Employee Signature</td>
+                          <td class='topborderbold'>Date</td>
+                      </tr>
+                      <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                      </tr>
+                      <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                      </tr>
+                      <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                      </tr>
+                      <tr>
+                          <td class='topborderbold'>Manager Signature</td>
+                          <td class='topborderbold'>Date</td>
+                      </tr>
+                  </table>
+              </td>
+          </tr>
+      </table>
+  </body>
+</html>

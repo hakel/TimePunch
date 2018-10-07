@@ -484,10 +484,12 @@ namespace TimePunch
                 string appPath = Application.StartupPath;
                 connectToDatabase();
                 fillComboWithUsers(cboUsers);
+                fillComboWithUsers(cboUsersTimesheet);
                 fillComboWithUsers(cboUsersForPassword);
                 setupQueries();
                 dtUpdateHours.Value = DateTime.Now;
                 dtClockOutAll.Value = DateTime.Now;
+                dtTimesheet.Value = DateTime.Now;
                 txtDBBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
                 txtLogBackup.Text = ConfigurationManager.AppSettings["BackupPath"].ToString();
 
@@ -1831,10 +1833,19 @@ namespace TimePunch
 
             StringBuilder sql = new StringBuilder();
 
-            sql.Append("drop table " + tableName);
-            SQLiteCommand command0 = new SQLiteCommand(sql.ToString(), m_dbConnection);
-            log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
-            command0.ExecuteNonQuery();
+            try
+            {
+                sql.Append("drop table " + tableName);
+                SQLiteCommand command0 = new SQLiteCommand(sql.ToString(), m_dbConnection);
+                log.Info("SQL: " + sql.Replace(Environment.NewLine, " "));
+                command0.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error", ex);
+                // dont show the message, who cares
+                //MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
+            }
 
             sql.Clear();
 
@@ -1846,15 +1857,17 @@ namespace TimePunch
             string dayOneStart = "1/1/" + startYear.ToString();
             DateTime startDate = DateTime.Parse(dayOneStart);
             startDate = startDate.AddDays(startWeekNumber * 7);
+            // we need to be using this var, not the startdate, which finds the first day of the week for that date
             var dateStart = startDate.AddDays(-(int)startDate.DayOfWeek);
 
             string dayOneEnd = "1/1/" + endYear.ToString();
             DateTime endDate = DateTime.Parse(dayOneEnd);
             endDate = endDate.AddDays(endWeekNumber * 7);
+            // we need to be using this var, not the enddate, which finds the first day of the week for that date
             var dateEnd = endDate.AddDays(-(int)endDate.DayOfWeek);
 
-            DateTime loopDate = startDate;
-            while (loopDate < endDate)
+            DateTime loopDate = dateStart;
+            while (loopDate < dateEnd)
             {
                 string part1 = loopDate.ToString("MM/dd/yy");
                 string part2 = loopDate.AddDays(dayChunksForColumns).AddMinutes(-1).ToString("MM/dd/yy");
@@ -1877,8 +1890,76 @@ namespace TimePunch
 
         }
 
+        private void btnShowContent_Click(object sender, EventArgs e)
+        {
+            // this is a first time setup, so show the admin screen
+            var htmlForm = new frmPrintableTimesheet();
+            // assign db variables so we dont have them duplicated
+            //adminForm.AdminUserID = userIdentity;
+            //adminForm.AdminUserPassword = userPassword;
 
+            htmlForm.ShowDialog(this);
 
+        }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ListViewItem xx = (ListViewItem)cboUsersTimesheet.SelectedItem;
+            string userIdentity = xx.Tag.ToString();
+
+            string signinType = "";
+
+            // Get all of the clockin types
+            List<string> signInTypes = new List<string>();
+            for (int i = 0; i < ConfigurationManager.AppSettings.Keys.Count; i++)
+            {
+                string keyName = ConfigurationManager.AppSettings.Keys[i].ToString();
+                if (keyName.Contains("SignInType_"))
+                {
+                    string sss = ConfigurationManager.AppSettings[keyName].ToString();
+                    // parse out the name from the time, we only need the name
+                    //string[] vals = sss.Split(new string[] { "," }, StringSplitOptions.None);
+                    signInTypes.Add(sss);
+                }
+            }
+
+            // if there are more then one then we need them to choose
+            if (signInTypes.Count > 1)
+            {
+                var signInPicker = new frmSignInTypePicker();
+                signInPicker.signInTypes = signInTypes;
+                signInPicker.userIdentity = userIdentity;
+                signInPicker.Text = "Choose Signin Type";
+
+                signInPicker.ShowDialog(this);
+
+                // grab the sign in type from the form
+                signinType = signInPicker.selectedSignInType;
+
+            }
+            else
+            {
+                signinType = signInTypes[0];
+            }
+
+            /// check to see if they cancelled
+            if (signinType == "")
+            {
+                //notify the user they canceled from picker
+                //txtResults.Text = userIdentity + " cancelled login." + Environment.NewLine + txtResults.Text;
+                return;
+            }
+
+            // show the print screen
+            var htmlForm = new frmPrintableTimesheet();
+
+            htmlForm.userID = userIdentity;
+            htmlForm.timesheetStartDate = dtTimesheet.Value;
+            htmlForm.weekCount = 2;
+            htmlForm.punchType = signinType;
+
+            htmlForm.ShowDialog(this);
+
+        }
     }
 }
