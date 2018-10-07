@@ -1961,75 +1961,74 @@ namespace TimePunch
 
         }
 
-        private void btnShowContent_Click(object sender, EventArgs e)
-        {
-            // this is a first time setup, so show the admin screen
-            var htmlForm = new frmPrintableTimesheet();
-            // assign db variables so we dont have them duplicated
-            //adminForm.AdminUserID = userIdentity;
-            //adminForm.AdminUserPassword = userPassword;
-
-            htmlForm.ShowDialog(this);
-
-        }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            ListViewItem xx = (ListViewItem)cboUsersTimesheet.SelectedItem;
-            string userIdentity = xx.Tag.ToString();
-
-            string signinType = "";
-
-            // Get all of the clockin types
-            List<string> signInTypes = new List<string>();
-            for (int i = 0; i < ConfigurationManager.AppSettings.Keys.Count; i++)
+            log.Debug("IN");
+            try
             {
-                string keyName = ConfigurationManager.AppSettings.Keys[i].ToString();
-                if (keyName.Contains("SignInType_"))
+                
+                ListViewItem xx = (ListViewItem)cboUsersTimesheet.SelectedItem;
+                string userIdentity = xx.Tag.ToString();
+
+                string signinType = "";
+
+                // Get all of the clockin types
+                List<string> signInTypes = new List<string>();
+                for (int i = 0; i < ConfigurationManager.AppSettings.Keys.Count; i++)
                 {
-                    string sss = ConfigurationManager.AppSettings[keyName].ToString();
-                    // parse out the name from the time, we only need the name
-                    //string[] vals = sss.Split(new string[] { "," }, StringSplitOptions.None);
-                    signInTypes.Add(sss);
+                    string keyName = ConfigurationManager.AppSettings.Keys[i].ToString();
+                    if (keyName.Contains("SignInType_"))
+                    {
+                        string sss = ConfigurationManager.AppSettings[keyName].ToString();
+                        // parse out the name from the time, we only need the name
+                        //string[] vals = sss.Split(new string[] { "," }, StringSplitOptions.None);
+                        signInTypes.Add(sss);
+                    }
                 }
-            }
 
-            // if there are more then one then we need them to choose
-            if (signInTypes.Count > 1)
+                // if there are more then one then we need them to choose
+                if (signInTypes.Count > 1)
+                {
+                    var signInPicker = new frmSignInTypePicker();
+                    signInPicker.signInTypes = signInTypes;
+                    signInPicker.userIdentity = userIdentity;
+                    signInPicker.Text = "Choose Signin Type";
+
+                    signInPicker.ShowDialog(this);
+
+                    // grab the sign in type from the form
+                    signinType = signInPicker.selectedSignInType;
+
+                }
+                else
+                {
+                    signinType = signInTypes[0];
+                }
+
+                /// check to see if they cancelled
+                if (signinType == "")
+                {
+                    //notify the user they canceled from picker
+                    //txtResults.Text = userIdentity + " cancelled login." + Environment.NewLine + txtResults.Text;
+                    return;
+                }
+
+                // show the print screen
+                var htmlForm = new frmPrintableTimesheet();
+
+                htmlForm.userID = userIdentity;
+                htmlForm.timesheetStartDate = dtTimesheet.Value;
+                htmlForm.weekCount = 2;
+                htmlForm.punchType = signinType;
+
+                htmlForm.ShowDialog(this);
+            }
+            catch (Exception ex)
             {
-                var signInPicker = new frmSignInTypePicker();
-                signInPicker.signInTypes = signInTypes;
-                signInPicker.userIdentity = userIdentity;
-                signInPicker.Text = "Choose Signin Type";
-
-                signInPicker.ShowDialog(this);
-
-                // grab the sign in type from the form
-                signinType = signInPicker.selectedSignInType;
-
+                log.Error("Error", ex);
+                MessageBox.Show(ex.Message, "Error - " + System.Reflection.MethodBase.GetCurrentMethod().Name);
             }
-            else
-            {
-                signinType = signInTypes[0];
-            }
-
-            /// check to see if they cancelled
-            if (signinType == "")
-            {
-                //notify the user they canceled from picker
-                //txtResults.Text = userIdentity + " cancelled login." + Environment.NewLine + txtResults.Text;
-                return;
-            }
-
-            // show the print screen
-            var htmlForm = new frmPrintableTimesheet();
-
-            htmlForm.userID = userIdentity;
-            htmlForm.timesheetStartDate = dtTimesheet.Value;
-            htmlForm.weekCount = 2;
-            htmlForm.punchType = signinType;
-
-            htmlForm.ShowDialog(this);
 
         }
     }
